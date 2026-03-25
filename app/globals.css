@@ -1,19 +1,21 @@
 @import "tailwindcss";
 
-/* Svetli mod (Default) */
-:root {
-  --bg-main: #ffffff;
-  --text-main: #0f172a;
+@theme {
+  --color-brand-blue: #3b82f6;
 }
 
-/* Tamni mod - Forsiramo preko .dark klase na <html> tagu */
+:root {
+  --background: 255 255 255;
+  --foreground: 15 23 42;
+}
+
 .dark {
-  --bg-main: #020617 !important;
-  --text-main: #f1f5f9 !important;
+  --background: 2 6 23;
+  --foreground: 248 250 252;
 }
 
 body {
-  background-color: var(--bg-main);
-  color: var(--text-main);
+  background: rgb(var(--background));
+  color: rgb(var(--foreground));
   transition: background 0.3s ease, color 0.3s ease;
 }
