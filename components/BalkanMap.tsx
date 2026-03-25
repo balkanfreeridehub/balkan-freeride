@@ -1,63 +1,106 @@
 "use client"
 import React from "react"
+// @ts-ignore
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps"
+import { scaleLinear } from "d3-scale"
 
-// Ovo je pojednostavljen geoJSON za Balkan (Srbija, CG, BiH, MK, Kosovo)
+// GeoJSON mapa Evrope (filtriraćemo je vizuelno na Balkan)
 const geoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/continents/europe.json"
 
-export default function BalkanMap({ resorts }: { resorts: any[] }) {
+// Skala za boje: Što više snega (forecast), to je jača narandžasta
+const colorScale = scaleLinear<string>()
+  .domain([0, 10, 30])
+  .range(["#27272a", "#ea580c", "#ff7e33"])
+
+interface Resort {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+  forecast: number;
+}
+
+export default function BalkanMap({ resorts }: { resorts: Resort[] }) {
   return (
-    <div className="bg-white dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] p-4 md:p-8 mb-12 overflow-hidden shadow-inner">
-      <div className="flex justify-between items-center mb-6 px-4">
-        <h3 className="text-xl font-black uppercase italic tracking-tighter">Live Snow <span className="text-orange-600">Map</span></h3>
-        <div className="flex items-center gap-2 opacity-40 text-[10px] font-bold uppercase tracking-widest">
-          <span className="w-2 h-2 bg-orange-600 rounded-full animate-ping"></span>
-          Active Sensors
-        </div>
-      </div>
-      
-      <div className="h-[300px] md:h-[500px] w-full">
-        <ComposableMap
-          projection="geoMercator"
-          projectionConfig={{
-            scale: 3500,
-            center: [20, 43.5] // Fokus na Balkan
-          }}
-          style={{ width: "100%", height: "100%" }}
-        >
-          <Geographies geography={geoUrl}>
-            {({ geographies }) =>
-              geographies.map((geo) => (
+    <div className="w-full bg-zinc-50 dark:bg-zinc-900/30 rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-inner p-4">
+      <ComposableMap
+        projection="geoMercator"
+        projectionConfig={{
+          rotate: [-19, -43, 0], // Centriranje na Balkan
+          scale: 3500            // Zumiranje regije
+        }}
+        style={{ width: "100%", height: "400px" }}
+      >
+        <Geographies geography={geoUrl}>
+          {({ geographies }: { geographies: any[] }) =>
+            geographies.map((geo) => {
+              // Imena država koje nas zanimaju na Balkanu
+              const balkanStates = ["Serbia", "Montenegro", "Bosnia and Herz.", "Macedonia", "Kosovo", "Albania", "Croatia"];
+              const isBalkan = balkanStates.includes(geo.properties.geounit);
+
+              return (
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill="currentColor"
-                  className="text-zinc-100 dark:text-zinc-800/40 stroke-zinc-300 dark:stroke-zinc-700/50"
+                  fill={isBalkan ? "#18181b" : "#09090b"}
+                  stroke={isBalkan ? "#3f3f46" : "#18181b"}
+                  strokeWidth={0.5}
                   style={{
                     default: { outline: "none" },
-                    hover: { outline: "none", fill: "#f4f4f5" },
+                    hover: { fill: isBalkan ? "#27272a" : "#09090b", outline: "none" },
+                    pressed: { outline: "none" },
                   }}
                 />
-              ))
-            }
-          </Geographies>
+              )
+            })
+          }
+        </Geographies>
 
-          {resorts.map((resort) => (
-            <Marker key={resort.id} coordinates={[resort.lon, resort.lat]}>
-              <circle 
-                r={resort.forecast > 0 ? 6 : 3} 
-                className={`${resort.forecast > 5 ? 'fill-orange-600 animate-pulse' : 'fill-zinc-400'} transition-all duration-500`} 
-              />
-              <text
-                textAnchor="middle"
-                y={-15}
-                className="fill-zinc-500 dark:fill-zinc-400 text-[10px] font-black uppercase italic pointer-events-none tracking-tighter"
-              >
-                {resort.forecast > 0 ? `${resort.name} (${resort.forecast}mm)` : ''}
-              </text>
-            </Marker>
-          ))}
-        </ComposableMap>
+        {resorts.map((resort) => (
+          <Marker key={resort.id} coordinates={[resort.lon, resort.lat]}>
+            {/* Pulsirajući krug oko markera ako ima snega */}
+            {resort.forecast > 5 && (
+              <circle r={8} fill={colorScale(resort.forecast)} opacity={0.3} className="animate-ping" />
+            )}
+            
+            {/* Glavni marker */}
+            <circle 
+              r={5} 
+              fill={colorScale(resort.forecast)} 
+              stroke="#ffffff" 
+              strokeWidth={2} 
+              className="cursor-pointer hover:r-7 transition-all"
+            />
+            
+            {/* Tekst pored markera */}
+            <text
+              textAnchor="middle"
+              y={-15}
+              style={{ 
+                fontFamily: "Inter, sans-serif", 
+                fill: "#71717a", 
+                fontSize: "10px", 
+                fontWeight: "900",
+                textTransform: "uppercase",
+                letterSpacing: "1px"
+              }}
+            >
+              {resort.name}
+            </text>
+          </Marker>
+        ))}
+      </ComposableMap>
+      
+      {/* Mini legenda u uglu mape */}
+      <div className="absolute bottom-8 left-8 flex items-center gap-4 bg-white/5 backdrop-blur-md p-3 rounded-2xl border border-white/10">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-zinc-700"></div>
+          <span className="text-[9px] font-bold uppercase opacity-50 tracking-widest">No Snow</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></div>
+          <span className="text-[9px] font-bold uppercase opacity-50 tracking-widest">Powder Alert</span>
+        </div>
       </div>
     </div>
   )
