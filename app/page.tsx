@@ -22,14 +22,15 @@ export default function Home() {
 
   useEffect(() => {
     async function load() {
+      console.log("%c [System] Započinjem osvežavanje planina...", "font-weight: bold; color: green");
       try {
         const data = await Promise.all(balkanResorts.map(async (r) => {
-          const w = await getWeatherData(r.id); // Koristimo ID stanice
+          const w = await getWeatherData(r.id);
           return { ...r, ...w };
         }));
         setResorts(data);
       } catch (err) {
-        console.error("Load failed:", err);
+        console.error("Fatalna greška pri učitavanju:", err);
       } finally {
         setLoading(false);
       }
@@ -38,23 +39,21 @@ export default function Home() {
   }, []);
 
   const t = {
-    sr: { forecast: "Prognoza", cam: "Kamera", wind: "Vetar", loading: "Učitavanje svih vrhova..." },
-    en: { forecast: "Forecast", cam: "Live Cam", wind: "Wind", loading: "Loading all peaks..." }
+    sr: { forecast: "Prognoza", cam: "Kamera", wind: "Vetar", loading: "Skeniranje vrhova..." },
+    en: { forecast: "Forecast", cam: "Live Cam", wind: "Wind", loading: "Scanning peaks..." }
   }[lang];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-500 font-sans">
+    <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-500">
       <nav className="border-b dark:border-white/10 sticky top-0 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-md z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
           <h1 className="text-xl font-black italic uppercase tracking-tighter">
             Balkan <span className="text-blue-600">Freeride</span> Hub
           </h1>
-          <div className="flex items-center gap-4">
-            <button onClick={() => setLang(lang === 'sr' ? 'en' : 'sr')} className="text-[10px] font-black uppercase px-3 py-1 bg-slate-100 dark:bg-white/10 rounded-lg">
-              {lang === 'sr' ? 'English' : 'Srpski'}
-            </button>
-            <ThemeToggle />
-          </div>
+          <button onClick={() => setLang(lang === 'sr' ? 'en' : 'sr')} className="text-[10px] font-black uppercase px-3 py-1 bg-slate-100 dark:bg-white/10 rounded-lg">
+            {lang === 'sr' ? 'English' : 'Srpski'}
+          </button>
+          <ThemeToggle />
         </div>
       </nav>
 
@@ -79,19 +78,25 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {loading ? (
-            <div className="col-span-full text-center py-20 font-black uppercase italic opacity-30 tracking-widest animate-pulse">{t.loading}</div>
+            <div className="col-span-full text-center py-20 font-black uppercase italic opacity-30 animate-pulse">{t.loading}</div>
           ) : (
             resorts.map((resort) => {
-              let totalSnow = 0;
-              if (resort.dailyForecast) {
-                const daysToSum = Math.ceil(timeframe / 24);
-                totalSnow = resort.dailyForecast.slice(0, daysToSum).reduce((acc: number, day: any) => {
-                  return day.avgTemp < 4 ? acc + day.precip : acc;
-                }, 0);
+              // PROVERA PODATAKA: Ako nema dailyForecast, ispiši grešku u karticu
+              if (!resort.dailyForecast) {
+                return (
+                  <div key={resort.id} className="p-8 border-2 border-dashed border-red-500/20 rounded-[3rem] text-center opacity-50">
+                    <p className="text-[10px] font-black text-red-500 uppercase">Greška pri učitavanju: {resort.name}</p>
+                  </div>
+                );
               }
 
+              const daysToSum = Math.ceil(timeframe / 24);
+              const totalSnow = resort.dailyForecast.slice(0, daysToSum).reduce((acc: number, day: any) => {
+                return day.avgTemp < 4 ? acc + day.precip : acc;
+              }, 0);
+
               return (
-                <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-8 rounded-[3rem] hover:shadow-2xl transition-all group">
+                <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-8 rounded-[3rem] hover:shadow-2xl transition-all group hover:-translate-y-1">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-2xl font-black uppercase italic leading-none">{resort.name}</h3>
@@ -101,24 +106,24 @@ export default function Home() {
                   </div>
 
                   <div className="flex items-center justify-between bg-white dark:bg-black/20 p-5 rounded-2xl border dark:border-white/5 mb-6">
-                    <div className="text-2xl font-black italic">{resort.temp}°</div>
+                    <div className="text-2xl font-black italic">{resort.temp ?? '?'}°</div>
                     <div className="flex items-center gap-4 border-l dark:border-white/10 pl-5">
                       <div className="flex flex-col items-center">
                         <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white font-bold" style={{ transform: `rotate(${resort.windDir}deg)` }}>↑</div>
                         <span className="text-[8px] font-black uppercase opacity-40 mt-1">{t.wind}</span>
                       </div>
-                      <span className="text-lg font-black">{resort.windSpeed}<span className="text-[10px] ml-1 opacity-50 uppercase text-blue-600">m/s</span></span>
+                      <span className="text-lg font-black">{resort.windSpeed ?? 0}<span className="text-[10px] ml-1 opacity-50 uppercase text-blue-600">m/s</span></span>
                     </div>
                   </div>
 
                   <div className="mb-8 bg-blue-600 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl shadow-blue-600/30">
                     <div className="relative z-10">
-                      <p className="text-[10px] font-black uppercase opacity-70 mb-1">{t.forecast} (+{timeframe/24} {lang === 'sr' ? 'Dana' : 'Days'})</p>
+                      <p className="text-[10px] font-black uppercase opacity-70 mb-1">{t.forecast} (+{timeframe/24} d)</p>
                       <p className="text-5xl font-black italic">+{Math.round(totalSnow)} <span className="text-2xl uppercase">cm</span></p>
                     </div>
                   </div>
 
-                  <button onClick={() => setSelectedResort(resort)} className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-500 transition-all shadow-lg group-hover:scale-[1.02]">
+                  <button onClick={() => setSelectedResort(resort)} className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-500 transition-all shadow-lg">
                     {t.cam}
                   </button>
                 </div>
