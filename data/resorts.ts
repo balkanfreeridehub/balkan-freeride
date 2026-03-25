@@ -2,15 +2,15 @@ export const balkanResorts = [
   { 
     id: 'kopaonik', 
     name: 'Kopaonik', 
-    lat: 43.2858, // Pančićev Vrh 2017m
-    lon: 20.8109, 
+    lat: 43.2862, 
+    lon: 20.8092, 
     camUrl: 'https://www.infokop.net/nm-skijaliste-kopaonik/kamere-uzivo-skijaliste-kopaonik.html' 
   },
   { 
     id: 'sar-planina', 
     name: 'Šar Planina', 
-    lat: 42.1667, // Visoki vrhovi Šare
-    lon: 20.8667, 
+    lat: 42.0833, 
+    lon: 20.8333, 
     camUrl: 'https://www.skisavez.com' 
   },
   { 
