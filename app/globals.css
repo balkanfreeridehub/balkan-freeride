@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* Ostatak tvog koda za :root i .dark ostaje isti ispod ove linije */
+:root {
+  background-color: #ffffff;
+  color: #09090b;
+}
+
+.dark {
+  background-color: #050505;
+  color: #fafafa;
+}
