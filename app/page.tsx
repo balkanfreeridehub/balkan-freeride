@@ -10,9 +10,7 @@ const timeOptions = [
   { label: { sr: '6h', en: '6h' }, value: 6 },
   { label: { sr: '12h', en: '12h' }, value: 12 },
   { label: { sr: '1 Dan', en: '1 Day' }, value: 24 },
-  { label: { sr: '2 Dana', en: '2 Days' }, value: 48 },
   { label: { sr: '3 Dana', en: '3 Days' }, value: 72 },
-  { label: { sr: '5 Dana', en: '5 Days' }, value: 120 },
   { label: { sr: '7 Dana', en: '7 Days' }, value: 168 },
   { label: { sr: '10 Dana', en: '10 Days' }, value: 240 }
 ];
@@ -39,7 +37,6 @@ export default function Home() {
     en: { forecast: "Forecast", cam: "Live Cam", wind: "Wind" }
   }[lang];
 
-  // Mapiranje Open-Meteo kodova u tekst
   const getConditionText = (code: number) => {
     if (code === 0) return lang === 'sr' ? "Vedro" : "Clear";
     if ([1, 2, 3].includes(code)) return lang === 'sr' ? "Malo oblačno" : "Partly Cloudy";
@@ -68,7 +65,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setLang(lang === 'sr' ? 'en' : 'sr')}
-              className="text-[10px] font-black uppercase px-3 py-1 bg-slate-100 dark:bg-white/10 rounded-lg border dark:border-white/5 hover:bg-blue-600 hover:text-white transition-all"
+              className="text-[10px] font-black uppercase px-3 py-1 bg-slate-100 dark:bg-white/10 rounded-lg border dark:border-white/5"
             >
               {lang === 'sr' ? 'English' : 'Srpski'}
             </button>
@@ -99,7 +96,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {resorts.map((resort) => (
             <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-8 rounded-[3rem] hover:shadow-2xl transition-all group">
-              <h3 className="text-2xl font-black uppercase italic mb-1 leading-none">{resort.name}</h3>
+              <h3 className="text-2xl font-black uppercase italic mb-1">{resort.name}</h3>
               <p className="text-[10px] font-bold text-blue-500 uppercase mb-6 tracking-widest">
                 {getConditionText(resort.condition)}
               </p>
@@ -111,7 +108,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-4 border-l dark:border-white/10 pl-5">
                   <div className="flex flex-col items-center">
-                    <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white font-bold mb-1 shadow-md" style={{ transform: `rotate(${resort.windDir}deg)`, transition: 'transform 1s' }}>↑</div>
+                    <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white font-bold mb-1 shadow-md" style={{ transform: `rotate(${resort.windDir}deg)` }}>↑</div>
                     <span className="text-[10px] font-black uppercase opacity-40">{t.wind}</span>
                   </div>
                   <span className="text-lg font-black">{resort.windSpeed}<span className="text-[10px] ml-0.5 opacity-50 uppercase text-blue-600 font-bold">m/s</span></span>
