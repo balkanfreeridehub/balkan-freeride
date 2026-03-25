@@ -15,12 +15,10 @@ const timeOptions = [
 export default function Home() {
   const [resortsWithData, setResortsWithData] = useState<any[]>([]);
   const [selectedResort, setSelectedResort] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState(24);
 
   useEffect(() => {
     async function loadData() {
-      setLoading(true);
       const data = await Promise.all(
         balkanResorts.map(async (resort) => {
           const weather = await getWeatherData(resort.lat, resort.lon);
@@ -36,13 +34,12 @@ export default function Home() {
         })
       );
       setResortsWithData(data);
-      setLoading(false);
     }
     loadData();
   }, [timeframe]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-300">
       <nav className="border-b border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
           <h1 className="text-xl font-black tracking-tighter uppercase italic">
@@ -57,7 +54,7 @@ export default function Home() {
           <BalkanMap resorts={resortsWithData} />
         </section>
 
-        <div className="flex flex-wrap justify-center gap-2 mb-12 p-2 bg-slate-100 dark:bg-slate-900/50 rounded-2xl w-fit mx-auto border border-slate-200 dark:border-white/5">
+        <div className="flex flex-wrap justify-center gap-2 mb-12 p-2 bg-slate-200/50 dark:bg-slate-900/50 rounded-2xl w-fit mx-auto border border-slate-200 dark:border-white/5">
           {timeOptions.map((opt) => (
             <button
               key={opt.value}
@@ -85,25 +82,25 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-slate-50 dark:bg-black/40 p-5 rounded-3xl border border-slate-100 dark:border-white/5">
+                <div className="bg-slate-100/50 dark:bg-black/40 p-5 rounded-3xl border border-slate-100 dark:border-white/5">
                   <p className="text-[10px] font-bold opacity-30 uppercase mb-3 text-center">Vetar</p>
                   <div className="flex flex-col items-center gap-2">
                     <div 
-                      className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white transition-transform duration-700"
+                      className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white transition-transform duration-700 shadow-md shadow-blue-500/20"
                       style={{ transform: `rotate(${resort.windDir}deg)` }}
                     >
                       ↑
                     </div>
-                    <span className="text-lg font-black">{resort.windSpeed}<span className="text-[10px] ml-1 opacity-50 text-blue-500 font-bold">m/s</span></span>
+                    <span className="text-lg font-black">{resort.windSpeed}<span className="text-[10px] ml-1 opacity-50 font-bold text-blue-500 uppercase">m/s</span></span>
                   </div>
                 </div>
-                <div className="bg-slate-50 dark:bg-black/40 p-5 rounded-3xl border border-slate-100 dark:border-white/5 text-center flex flex-col justify-center">
+                <div className="bg-slate-100/50 dark:bg-black/40 p-5 rounded-3xl border border-slate-100 dark:border-white/5 text-center flex flex-col justify-center">
                   <p className="text-[10px] font-bold opacity-30 uppercase mb-3">Padavine</p>
-                  <p className="text-2xl font-black">{resort.precip}<span className="text-[10px] ml-1 opacity-50 text-blue-600 font-bold">MM</span></p>
+                  <p className="text-2xl font-black">{resort.precip}<span className="text-[10px] ml-1 opacity-50 text-blue-600 font-bold tracking-tighter">MM</span></p>
                 </div>
               </div>
 
-              <div className="mb-8 bg-blue-600 p-6 rounded-[2rem] text-white shadow-xl flex justify-between items-center relative overflow-hidden">
+              <div className="mb-8 bg-blue-600 p-6 rounded-[2rem] text-white shadow-xl shadow-blue-600/20 flex justify-between items-center relative overflow-hidden">
                 <div className="relative z-10">
                   <p className="text-[10px] font-bold uppercase opacity-80 mb-1">Prognoza {timeframe}h</p>
                   <p className="text-4xl font-black italic">+{Math.round(resort.forecast * (timeframe/24))}cm</p>
@@ -115,7 +112,7 @@ export default function Home() {
 
               <button 
                 onClick={() => setSelectedResort(resort)}
-                className="w-full py-5 bg-slate-950 dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white transition-all"
+                className="w-full py-5 bg-slate-950 dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white transition-all shadow-lg"
               >
                 Launch Live Cam
               </button>

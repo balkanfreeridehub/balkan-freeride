@@ -1,11 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  body {
-    @apply antialiased text-slate-900 dark:text-slate-100;
-  }
+/* Osnovni stilovi bez @apply direktiva koje pucaju */
+body {
+  margin: 0;
+  padding: 0;
 }
 
 /* Tanak plavi scrollbar */
