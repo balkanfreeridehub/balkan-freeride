@@ -2,33 +2,21 @@ export const balkanResorts = [
   { 
     id: 'kopaonik', 
     name: 'Kopaonik', 
-    country: 'Serbia', 
+    country: 'SRB', 
     lat: 43.2858, 
     lon: 20.8118, 
+    videoType: 'youtube',
+    videoId: '5_XfbBvYp8U', // Primer ID-a, zameniti pravim
     camUrl: 'https://www.infokop.net/web-kamere-kopaonik/pancicev-vrh-live.html' 
   },
   { 
     id: 'jahorina', 
     name: 'Jahorina', 
-    country: 'BiH', 
+    country: 'BIH', 
     lat: 43.7383, 
     lon: 18.5636, 
+    videoType: 'image',
+    videoId: 'https://panteon.cam/jahorina/live.jpg', // Direktna slika koja se osvežava
     camUrl: 'https://www.jahorina.org/web-kamere/' 
-  },
-  { 
-    id: 'zabljak', 
-    name: 'Durmitor', 
-    country: 'Montenegro', 
-    lat: 43.1555, 
-    lon: 19.1219, 
-    camUrl: 'https://www.skiresort.info/ski-resort/durmitor-zabljak/webcams/' 
-  },
-  { 
-    id: 'popova-sapka', 
-    name: 'Popova Šapka', 
-    country: 'Macedonia', 
-    lat: 42.0139, 
-    lon: 20.8844, 
-    camUrl: 'https://www.skiresort.info/ski-resort/popova-sapka/webcams/' 
   }
 ];
