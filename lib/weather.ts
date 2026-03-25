@@ -8,7 +8,7 @@ export async function getWeatherData(lat: number, lon: number) {
     return {
       current: {
         temp: Math.round(data.current_weather.temperature),
-        windSpeed: Math.round(data.current_weather.windspeed / 3.6), // km/h u m/s
+        windSpeed: Math.round(data.current_weather.windspeed / 3.6), // Prebacujemo u m/s
         windDir: data.current_weather.winddirection,
       },
       hourly: data.hourly

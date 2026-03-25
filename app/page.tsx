@@ -33,18 +33,18 @@ export default function Home() {
       setLoading(false);
     }
     load();
-  }, [timeframe]); // Osvežava kad promeniš sate
+  }, [timeframe]);
 
   const getFreerideStatus = (snow: number, temp: number, wind: number) => {
     let score = 0;
     if (snow > 10) score += 2;
     else if (snow > 3) score += 1;
     if (temp < 0) score += 1;
-    if (wind < 8) score += 1; // 30kmh je oko 8m/s
+    if (wind < 8) score += 1;
 
-    if (score >= 4) return { cls: 'bg-green-500', label: lang === 'sr' ? 'POWDER ALERT' : 'POWDER ALERT' };
-    if (score >= 2) return { cls: 'bg-yellow-400 text-black', label: lang === 'sr' ? 'RIDEABLE' : 'RIDEABLE' };
-    return { cls: 'bg-red-500', label: lang === 'sr' ? 'SKIP' : 'SKIP' };
+    if (score >= 4) return { cls: 'bg-[#00c853]', label: 'POWDER ALERT' };
+    if (score >= 2) return { cls: 'bg-[#ffd600] text-black', label: 'RIDEABLE' };
+    return { cls: 'bg-[#d50000]', label: 'SKIP' };
   };
 
   return (
@@ -55,8 +55,8 @@ export default function Home() {
             Balkan <span className="text-blue-600">Freeride</span> Hub
           </h1>
           <div className="flex items-center gap-3">
-            <Link href="/test" className="text-[10px] font-black uppercase px-3 py-1.5 bg-slate-100 dark:bg-white/10 rounded-lg">Lab 🧪</Link>
-            <button onClick={() => setLang(lang === 'sr' ? 'en' : 'sr')} className="text-[10px] font-black uppercase px-3 py-1.5 bg-slate-100 dark:bg-white/10 rounded-lg">
+            <Link href="/test" className="text-[10px] font-black uppercase px-3 py-1.5 bg-slate-100 dark:bg-white/10 rounded-lg hover:bg-blue-600 hover:text-white transition-all">Lab 🧪</Link>
+            <button onClick={() => setLang(lang === 'sr' ? 'en' : 'sr')} className="text-[10px] font-black uppercase px-3 py-1.5 bg-slate-100 dark:bg-white/10 rounded-lg border dark:border-white/5">
                 {lang === 'sr' ? 'EN' : 'SR'}
             </button>
             <ThemeToggle />
@@ -69,7 +69,6 @@ export default function Home() {
           <BalkanMap resorts={resorts} />
         </div>
 
-        {/* TIME SELECTOR (PRO STYLE) */}
         <div className="flex flex-wrap justify-center gap-2 mb-12 p-2 bg-slate-100 dark:bg-white/5 rounded-2xl w-fit mx-auto border dark:border-white/5 shadow-inner">
           {timeOptions.map((opt) => (
             <button
@@ -91,51 +90,66 @@ export default function Home() {
             resorts.map((resort) => {
               if (!resort.hourly) return null;
 
-              // Matematika za sneg i padavine
-              const snow = resort.hourly.snowfall.slice(0, timeframe).reduce((a: any, b: any) => a + (b || 0), 0);
-              const precip = resort.hourly.precipitation.slice(0, timeframe).reduce((a: any, b: any) => a + (b || 0), 0);
-              const status = getFreerideStatus(snow, resort.current.temp, resort.current.windSpeed);
+              // --- NAPREDNA BALKAN SLR MATEMATIKA ---
+              let calcSnow = 0;
+              let calcRain = 0;
+              for (let i = 0; i < timeframe; i++) {
+                const t = resort.hourly.temperature_2m[i];
+                const p = resort.hourly.precipitation[i] || 0;
+                if (p > 0) {
+                  if (t <= -5) calcSnow += p * 1.3;
+                  else if (t <= 0) calcSnow += p * 1.0;
+                  else if (t <= 2) calcSnow += p * 0.5;
+                  else calcRain += p;
+                }
+              }
+
+              const status = getFreerideStatus(calcSnow, resort.current.temp, resort.current.windSpeed);
 
               return (
-                <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-8 rounded-[3rem] hover:shadow-2xl transition-all group">
+                <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-8 rounded-[3rem] hover:shadow-2xl transition-all group relative overflow-hidden">
                   <div className="flex justify-between items-start mb-6">
                     <div>
-                      <div className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black mb-3 uppercase tracking-tighter ${status.cls}`}>
+                      <div className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black mb-3 uppercase tracking-tighter shadow-sm ${status.cls}`}>
                         {status.label}
                       </div>
                       <h3 className="text-2xl font-black uppercase italic leading-none">{resort.name}</h3>
                       <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest mt-1">{resort.country}</p>
                     </div>
-                    <span className="text-3xl">🏔️</span>
+                    <span className="text-3xl opacity-50 group-hover:opacity-100 transition-opacity">🏔️</span>
                   </div>
 
-                  {/* TRENUTNO STANJE (Količina padavina i temperatura) */}
                   <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="bg-white dark:bg-black/20 p-4 rounded-2xl border dark:border-white/5">
-                        <p className="text-[8px] font-black uppercase opacity-40 mb-1">{lang === 'sr' ? 'Trenutno' : 'Current'}</p>
+                    <div className="bg-white dark:bg-black/20 p-4 rounded-2xl border dark:border-white/5 shadow-sm">
+                        <p className="text-[8px] font-black uppercase opacity-40 mb-1">Temp</p>
                         <p className="text-2xl font-black italic">{resort.current.temp}°C</p>
                     </div>
-                    <div className="bg-white dark:bg-black/20 p-4 rounded-2xl border dark:border-white/5">
-                        <p className="text-[8px] font-black uppercase opacity-40 mb-1">{lang === 'sr' ? 'Vetar' : 'Wind'}</p>
+                    <div className="bg-white dark:bg-black/20 p-4 rounded-2xl border dark:border-white/5 shadow-sm">
+                        <p className="text-[8px] font-black uppercase opacity-40 mb-1">Vetar</p>
                         <p className="text-2xl font-black italic">{resort.current.windSpeed} <span className="text-xs">m/s</span></p>
                     </div>
                   </div>
 
                   <div className="mb-8 bg-blue-600 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl shadow-blue-600/30">
                     <div className="relative z-10">
-                      <p className="text-[10px] font-black uppercase opacity-70 mb-1">Snowfall (+{timeframe}h)</p>
+                      <p className="text-[10px] font-black uppercase opacity-70 mb-1 italic">Sneg (+{timeframe}h)</p>
                       <p className="text-5xl font-black italic">
-                        +{snow.toFixed(1)} <span className="text-2xl uppercase font-normal">cm</span>
+                        +{calcSnow.toFixed(1)} <span className="text-2xl uppercase font-normal">cm</span>
                       </p>
-                      <p className="text-[10px] font-bold mt-2 opacity-60 italic">
-                        Rain/Precip: {precip.toFixed(1)} mm
-                      </p>
+                      {calcRain > 0 && (
+                        <p className="text-[9px] font-bold mt-2 bg-black/20 w-fit px-2 py-0.5 rounded-full border border-white/10">
+                          ⚠️ Moguća kiša: {calcRain.toFixed(1)} mm
+                        </p>
+                      )}
                     </div>
+                    {status.label === 'POWDER ALERT' && (
+                        <div className="absolute -right-2 -bottom-2 opacity-10 text-8xl rotate-12">❄️</div>
+                    )}
                   </div>
 
                   <button 
                     onClick={() => setSelectedResort(resort)}
-                    className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-500 transition-all"
+                    className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-500 transition-all shadow-lg shadow-black/5 dark:shadow-none"
                   >
                     {lang === 'sr' ? 'KAMERE' : 'LIVE CAMS'}
                   </button>
