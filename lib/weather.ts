@@ -3,40 +3,43 @@ export async function getWeatherData(lat: number, lon: number) {
     const res = await fetch(`https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`, {
       headers: { 'User-Agent': 'BalkanFreerideHub/1.0' }
     });
+    
+    if (!res.ok) return null;
     const data = await res.json();
     const timeseries = data.properties.timeseries[0].data;
-    
-    // Hvatanje padavina - proveravamo više izvora jer API nekad jedan ostavi prazan
-    const precip1h = timeseries.next_1_hours?.details?.precipitation_amount || 0;
-    const precip6h = timeseries.next_6_hours?.details?.precipitation_amount || 0;
-    
-    // Uzimamo veću vrednost da ne bismo prikazali 0 ako sneg upravo kreće
-    const currentPrecip = Math.max(precip1h, (precip6h / 6)); 
-    
-    const temp = data.properties.timeseries[0].data.instant.details.air_temperature;
+    const current = timeseries.instant.details;
+
+    // STARA LOGIKA: Uzimamo padavine iz 1h ili 6h bloka, šta god je dostupno
+    const precip = timeseries.next_1_hours?.details?.precipitation_amount 
+                || (timeseries.next_6_hours?.details?.precipitation_amount / 6) 
+                || 0;
+
+    const temp = current.air_temperature;
     const symbol = timeseries.next_1_hours?.summary?.symbol_code || "";
 
-    // Freeride matematika: 1mm padavina na minusu = 1cm snega
-    // Ako je temp < 1°C, tretiramo sve padavine kao sneg
-    const isSnowing = symbol.includes('snow') || temp < 1;
-    const snowResult = isSnowing ? Math.max(precip1h, precip6h) : 0;
+    // "Agresivna" detekcija snega: 
+    // Ako simbol sadrži sneg ILI su padavine tu a temp je ispod 1.5°C
+    const isSnowing = symbol.includes('snow') || (precip > 0 && temp < 1.5);
+    
+    // 1mm kiše na planini je ~1cm snega
+    const snowVal = isSnowing ? precip : 0;
 
     return {
       temp: Math.round(temp),
-      windSpeed: Math.round(data.properties.timeseries[0].data.instant.details.wind_speed),
-      windDir: data.properties.timeseries[0].data.instant.details.wind_from_direction,
-      precip: Math.max(precip1h, precip6h).toFixed(1),
-      forecast: snowResult.toFixed(1),
-      condition: translateCondition(symbol)
+      windSpeed: Math.round(current.wind_speed),
+      windDir: current.wind_from_direction,
+      precip: precip.toFixed(1),
+      forecast: snowVal.toFixed(2), // Čuvamo preciznost za množenje u page.tsx
+      condition: translateCondition(symbol, temp)
     };
   } catch (e) {
-    console.error("Weather API Error:", e);
+    console.error("Greška pri povlačenju vremena:", e);
     return null;
   }
 }
 
-function translateCondition(code: string) {
-  if (code.includes('snow')) return 'Sneg';
+function translateCondition(code: string, temp: number) {
+  if (code.includes('snow') || (code.includes('rain') && temp < 1)) return 'Sneg';
   if (code.includes('rain')) return 'Kiša';
   if (code.includes('cloud')) return 'Oblačno';
   if (code.includes('fog')) return 'Magla';

@@ -35,22 +35,21 @@ export default function Home() {
   }, []);
 
   const t = {
-    sr: { forecast: "Prognoza", cam: "Kamera", wind: "Vetar", precip: "Padavine" },
-    en: { forecast: "Forecast", cam: "Live Cam", wind: "Wind", precip: "Precip" }
+    sr: { forecast: "Prognoza", cam: "Kamera", wind: "Vetar" },
+    en: { forecast: "Forecast", cam: "Live Cam", wind: "Wind" }
   }[lang];
 
   const getWeatherIcon = (cond: string) => {
     const c = cond?.toLowerCase() || "";
-    if (c.includes('sneg') || c.includes('snow')) return '❄️';
-    if (c.includes('kiša') || c.includes('rain')) return '🌧️';
-    if (c.includes('oblačno') || c.includes('cloud')) return '☁️';
-    if (c.includes('magla') || c.includes('fog')) return '🌫️';
+    if (c.includes('sneg')) return '❄️';
+    if (c.includes('kiša')) return '🌧️';
+    if (c.includes('oblačno')) return '☁️';
+    if (c.includes('magla')) return '🌫️';
     return '☀️';
   };
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-500">
-      {/* Navigacija */}
       <nav className="border-b dark:border-white/10 sticky top-0 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-md z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
           <h1 className="text-xl font-black italic uppercase tracking-tighter">
@@ -59,7 +58,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setLang(lang === 'sr' ? 'en' : 'sr')}
-              className="text-[10px] font-black uppercase px-3 py-1 bg-slate-100 dark:bg-white/10 rounded-lg border dark:border-white/5 transition-colors hover:bg-blue-600 hover:text-white"
+              className="text-[10px] font-black uppercase px-3 py-1 bg-slate-100 dark:bg-white/10 rounded-lg border dark:border-white/5 hover:bg-blue-600 hover:text-white transition-all"
             >
               {lang === 'sr' ? 'English' : 'Srpski'}
             </button>
@@ -69,21 +68,17 @@ export default function Home() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Mapa sekcija */}
         <div className="rounded-[2.5rem] overflow-hidden border dark:border-white/10 mb-10 shadow-2xl bg-slate-50 dark:bg-slate-900 min-h-[400px]">
           <BalkanMap resorts={resorts} />
         </div>
 
-        {/* Time Span Selector */}
-        <div className="flex flex-wrap justify-center gap-2 mb-12 p-2 bg-slate-100 dark:bg-white/5 rounded-2xl w-fit mx-auto border dark:border-white/5 shadow-inner">
+        <div className="flex flex-wrap justify-center gap-2 mb-12 p-2 bg-slate-100 dark:bg-white/5 rounded-2xl w-fit mx-auto border dark:border-white/5">
           {timeOptions.map((opt) => (
             <button
               key={opt.value}
               onClick={() => setTimeframe(opt.value)}
-              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all duration-300 ${
-                timeframe === opt.value 
-                ? 'bg-blue-600 text-white shadow-lg scale-105' 
-                : 'text-slate-400 hover:text-blue-500'
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${
+                timeframe === opt.value ? 'bg-blue-600 text-white shadow-lg scale-105' : 'opacity-40 hover:opacity-100'
               }`}
             >
               {opt.label[lang]}
@@ -91,20 +86,13 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Kartice skijališta */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {resorts.map((resort) => (
-            <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-8 rounded-[3rem] hover:shadow-2xl transition-all hover:-translate-y-1 group">
-              <div className="mb-6">
-                <h3 className="text-2xl font-black uppercase italic leading-none mb-2">{resort.name}</h3>
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                  <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{resort.condition}</p>
-                </div>
-              </div>
-              
-              {/* Trenutni uslovi u jednom redu */}
-              <div className="flex items-center justify-between bg-white dark:bg-black/20 p-5 rounded-2xl border dark:border-white/5 mb-6 shadow-sm">
+            <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-8 rounded-[3rem] hover:shadow-2xl transition-all group">
+              <h3 className="text-2xl font-black uppercase italic mb-1">{resort.name}</h3>
+              <p className="text-[10px] font-bold text-blue-500 uppercase mb-6 tracking-widest">{resort.condition}</p>
+
+              <div className="flex items-center justify-between bg-white dark:bg-black/20 p-5 rounded-2xl border dark:border-white/5 mb-6">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{getWeatherIcon(resort.condition)}</span>
                   <span className="text-2xl font-black italic">{resort.temp}°</span>
@@ -114,28 +102,24 @@ export default function Home() {
                     <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white font-bold mb-1 shadow-md" style={{ transform: `rotate(${resort.windDir}deg)`, transition: 'transform 1s' }}>↑</div>
                     <span className="text-[10px] font-black uppercase opacity-40">{t.wind}</span>
                   </div>
-                  <span className="text-lg font-black">{resort.windSpeed}<span className="text-[10px] ml-0.5 opacity-50 uppercase">m/s</span></span>
+                  <span className="text-lg font-black">{resort.windSpeed}<span className="text-[10px] ml-0.5 opacity-50 uppercase text-blue-600 font-bold">m/s</span></span>
                 </div>
               </div>
 
-              {/* Snow Forecast Box */}
               <div className="mb-8 bg-blue-600 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl shadow-blue-600/30">
                 <div className="relative z-10">
                   <p className="text-[10px] font-black uppercase opacity-70 mb-1">
                     {t.forecast} (+{timeOptions.find(o => o.value === timeframe)?.label[lang]})
                   </p>
                   <p className="text-5xl font-black italic">
-                    +{Math.round(parseFloat(resort.forecast || "0") * (timeframe / 6))} <span className="text-2xl uppercase">cm</span>
+                    +{Math.round(parseFloat(resort.forecast || "0") * timeframe)} <span className="text-2xl uppercase">cm</span>
                   </p>
                 </div>
-                {/* Geometrijska pahulja */}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="w-24 h-24 absolute -right-4 -top-4 opacity-20 group-hover:rotate-90 transition-transform duration-1000">
                     <line x1="12" y1="2" x2="12" y2="22"></line>
                     <line x1="20" y1="12" x2="4" y2="12"></line>
                     <line x1="17.66" y1="17.66" x2="6.34" y2="6.34"></line>
                     <line x1="17.66" y1="6.34" x2="6.34" y2="17.66"></line>
-                    <polyline points="15 5 12 2 9 5"></polyline>
-                    <polyline points="15 19 12 22 9 19"></polyline>
                 </svg>
               </div>
 
