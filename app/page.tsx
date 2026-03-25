@@ -12,7 +12,7 @@ import {
 
 const BalkanMap = dynamic(() => import('../components/BalkanMap'), { 
   ssr: false,
-  loading: () => <div className="h-full w-full bg-slate-100 dark:bg-slate-900 animate-pulse flex items-center justify-center font-black opacity-20 italic">MAP LOADING...</div>
+  loading: () => <div className="h-full w-full bg-slate-100 dark:bg-slate-900 animate-pulse flex items-center justify-center font-black opacity-20 italic uppercase">Učitavam mapu...</div>
 });
 
 const timeOptions = [
@@ -29,7 +29,7 @@ const translations = {
 const WeatherVisual = ({ code }: { code: number }) => {
   const hour = new Date().getHours();
   const isNight = hour >= 19 || hour < 6;
-  const className = "w-10 h-10 text-slate-800 dark:text-white";
+  const className = "w-12 h-12 text-slate-800 dark:text-white"; // Povećana ikona vremena
 
   if (code >= 71 && code <= 86) return <CloudSnow className={className} />;
   if (code >= 51 && code <= 67) return <CloudRain className={className} />;
@@ -71,33 +71,38 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-500">
-      <nav className="border-b dark:border-white/10 sticky top-0 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-md z-50 px-6 h-20 flex items-center justify-between">
-        <h1 className="text-xl font-black italic uppercase tracking-tighter italic">Balkan <span className="text-blue-600">Freeride</span></h1>
-        <div className="flex items-center gap-4">
-          <button onClick={() => setLang(lang === 'sr' ? 'en' : 'sr')} className="text-[10px] font-black px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-lg border dark:border-white/10 italic">
-            {lang === 'sr' ? 'SRB' : 'ENG'}
-          </button>
-          <ThemeToggle />
+    <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-500 font-sans">
+      <nav className="border-b dark:border-white/10 sticky top-0 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-md z-50 px-6">
+        <div className="max-w-7xl mx-auto h-20 flex justify-between items-center">
+          {/* Vraćeno puno ime brenda */}
+          <h1 className="text-xl font-black italic uppercase tracking-tighter">
+            Balkan <span className="text-blue-600">Freeride</span> Hub
+          </h1>
+          <div className="flex items-center gap-4">
+            <button onClick={() => setLang(lang === 'sr' ? 'en' : 'sr')} className="text-[10px] font-black px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-md border dark:border-white/10">
+              {lang === 'sr' ? 'SRB' : 'ENG'}
+            </button>
+            <ThemeToggle />
+          </div>
         </div>
       </nav>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="h-[450px] rounded-[3rem] overflow-hidden border dark:border-white/10 mb-12 shadow-2xl relative">
+        <div className="rounded-[2.5rem] overflow-hidden border dark:border-white/10 mb-10 shadow-2xl bg-slate-50 dark:bg-slate-900 h-[450px]">
           <BalkanMap resorts={resorts} timeframe={timeframe} />
         </div>
 
-        <div className="flex flex-wrap justify-center gap-2 mb-16 p-2 bg-slate-100 dark:bg-white/5 rounded-[2rem] w-fit mx-auto border dark:border-white/10 shadow-inner">
+        <div className="flex flex-wrap justify-center gap-1.5 mb-12 p-1.5 bg-slate-100 dark:bg-white/5 rounded-2xl w-fit mx-auto border dark:border-white/5 shadow-inner">
           {timeOptions.map((opt) => (
             <button key={opt.value} onClick={() => setTimeframe(opt.value)}
-              className={`px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase transition-all ${timeframe === opt.value ? 'bg-blue-600 text-white shadow-lg scale-105' : 'text-slate-400 hover:text-blue-500'}`}>
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${timeframe === opt.value ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-blue-500'}`}>
               {opt.label}
             </button>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {loading ? <div className="col-span-full text-center py-20 font-black uppercase italic opacity-20 animate-pulse tracking-widest">{t.scan}</div> : 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {loading ? <div className="col-span-full text-center py-20 font-black uppercase italic opacity-20 animate-pulse tracking-widest uppercase">{t.scan}</div> : 
             resorts.map((resort) => {
               if (!resort.hourly) return null;
               let calcSnow = 0, calcRain = 0, totalPrecip = 0;
@@ -112,38 +117,46 @@ export default function Home() {
               const status = getFreerideStatus(calcSnow);
 
               return (
-                <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-8 rounded-[3.5rem] flex flex-col h-full shadow-sm hover:shadow-2xl transition-all group">
-                  <div className="mb-6">
-                    <div className={`inline-block px-4 py-1 rounded-full text-[10px] font-black mb-4 uppercase tracking-tighter ${status.cls}`}>{status.label}</div>
-                    <h3 className="text-3xl font-black uppercase italic leading-none tracking-tighter group-hover:text-blue-600 transition-colors">{resort.name}</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2">{resort.country}</p>
+                <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-7 rounded-[3rem] shadow-sm flex flex-col h-full hover:shadow-xl transition-all">
+                  <div className="h-20 mb-4">
+                    <div className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black mb-3 uppercase tracking-tighter shadow-sm ${status.cls}`}>{status.label}</div>
+                    <h3 className="text-2xl font-black uppercase italic leading-none tracking-tight">{resort.name}</h3>
+                    <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest mt-1">{resort.country}</p>
                   </div>
 
-                  <div className="bg-blue-600 p-8 rounded-[2.5rem] text-white mb-8 relative overflow-hidden shadow-xl shadow-blue-600/20">
-                    <p className="text-[10px] font-black uppercase opacity-60 mb-2 italic tracking-widest">{t.snowfall}</p>
-                    <p className="text-6xl font-black italic">+{calcSnow.toFixed(1)} <span className="text-2xl font-normal opacity-50">cm</span></p>
-                    <div className="mt-4 pt-4 border-t border-white/10 flex gap-4 text-[10px] font-black opacity-60">
-                      <span>{t.total}: {totalPrecip.toFixed(1)}mm</span>
-                      {calcRain > 0 && <span className="text-red-200">{t.rain}: {calcRain.toFixed(1)}mm</span>}
+                  <div className="h-44 bg-blue-600 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl shadow-blue-600/30 mb-6 flex flex-col justify-center">
+                    <div className="relative z-10">
+                      <p className="text-[10px] font-black uppercase opacity-70 mb-1 italic tracking-widest">{t.snowfall}</p>
+                      <p className="text-5xl font-black italic mb-2 tracking-tighter">+{calcSnow.toFixed(1)} <span className="text-2xl font-normal opacity-50 uppercase tracking-normal ml-1">cm</span></p>
+                      <div className="flex gap-3 pt-3 border-t border-white/10 text-[9px] font-black uppercase opacity-60">
+                        <span>{t.total}: {totalPrecip.toFixed(1)}mm</span>
+                        {calcRain > 0 && <span className="text-red-200 border-l border-white/20 pl-3">{t.rain}: {calcRain.toFixed(1)}mm</span>}
+                      </div>
                     </div>
                   </div>
 
-                  {/* NOVI TRIPLE BOX DIZAJN */}
-                  <div className="grid grid-cols-3 gap-4 mb-10">
-                    <div className="aspect-square bg-white dark:bg-white/5 rounded-[2rem] border dark:border-white/5 flex items-center justify-center shadow-sm">
+                  {/* UJEDNAČENI TRIPLE BOX GRID */}
+                  <div className="grid grid-cols-3 gap-3 mb-8">
+                    <div className="aspect-square bg-white dark:bg-white/5 rounded-3xl border dark:border-white/5 flex items-center justify-center shadow-sm">
                       <WeatherVisual code={resort.current.weatherCode} />
                     </div>
-                    <div className="aspect-square bg-white dark:bg-white/5 rounded-[2rem] border dark:border-white/5 flex flex-col items-center justify-center shadow-sm">
-                      <Thermometer className="w-5 h-5 mb-2 opacity-20" />
-                      <span className="text-2xl font-black italic">{resort.current.temp}°</span>
+                    
+                    <div className="aspect-square bg-white dark:bg-white/5 rounded-3xl border dark:border-white/5 flex flex-col items-center justify-center shadow-sm">
+                      <Thermometer className="w-8 h-8 mb-2 text-slate-800 dark:text-white" />
+                      <span className="text-xl font-black italic">{resort.current.temp}°</span>
                     </div>
-                    <div className="aspect-square bg-white dark:bg-white/5 rounded-[2rem] border dark:border-white/5 flex flex-col items-center justify-center shadow-sm overflow-hidden">
-                      <Navigation2 className="w-8 h-8 text-blue-600 fill-blue-600 mb-1" style={{ transform: `rotate(${resort.current.windDir}deg)`, transition: '2s' }} />
-                      <span className="text-[12px] font-black">{resort.current.windSpeed} <span className="text-[8px] opacity-30">m/s</span></span>
+
+                    <div className="aspect-square bg-white dark:bg-white/5 rounded-3xl border dark:border-white/5 flex flex-col items-center justify-center shadow-sm">
+                      <Navigation2 
+                        className="w-8 h-8 mb-2 text-blue-600 fill-blue-600" 
+                        style={{ transform: `rotate(${resort.current.windDir}deg)`, transition: '2s' }} 
+                      />
+                      <span className="text-xl font-black italic leading-none">{resort.current.windSpeed}</span>
+                      <span className="text-[8px] font-black opacity-30 mt-1 uppercase tracking-tighter italic">m/s</span>
                     </div>
                   </div>
 
-                  <button onClick={() => setSelectedResort(resort)} className="mt-auto w-full py-6 bg-slate-900 dark:bg-white text-white dark:text-black font-black uppercase text-[11px] tracking-[0.3em] rounded-[1.8rem] hover:bg-blue-600 dark:hover:bg-blue-600 dark:hover:text-white transition-all active:scale-95 shadow-xl">
+                  <button onClick={() => setSelectedResort(resort)} className="mt-auto w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-600 dark:hover:text-white transition-all shadow-lg active:scale-95">
                     {t.cams}
                   </button>
                 </div>
