@@ -1,26 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --bg-color: #ffffff;
-  --text-color: #0f172a;
-  --map-bg: #f1f5f9;
-  --map-stroke: #cbd5e1; /* Jači kontrast za granice u light modu */
+  --bg: #ffffff;
+  --card: #f8fafc;
+  --border: #e2e8f0;
+  --text: #0f172a;
 }
 
 .dark {
-  --bg-color: #020617;
-  --text-color: #f8fafc;
-  --map-bg: #0f172a;
-  --map-stroke: #334155;
+  --bg: #020617;
+  --card: rgba(30, 41, 59, 0.5);
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #f1f5f9;
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  transition: all 0.3s ease;
-  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Scrollbar ostaje diskretan */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
+.glass-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
