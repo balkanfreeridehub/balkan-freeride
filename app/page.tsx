@@ -13,12 +13,13 @@ export default async function Home() {
         forecast: weather?.forecast || 0,
         temp: weather?.temp || 0,
         wind: weather?.wind || 0,
-        current: Math.floor(Math.random() * 40) + 30 // Simulacija baze snega
+        // Simulacija baze snega (kasnije možemo uvesti pravi API za sneg)
+        current: Math.floor(Math.random() * 40) + 30 
       };
     })
   );
 
-  // Sortiramo: Planine sa najviše novog snega idu prve
+  // Sortiramo: Planine sa najviše novog snega (forecast) idu prve
   const sortedResorts = resortsWithData.sort((a, b) => b.forecast - a.forecast);
 
   return (
@@ -36,7 +37,7 @@ export default async function Home() {
 
       <main className="max-w-7xl mx-auto px-6 py-12">
         
-        {/* Hero Section */}
+        {/* Header Sekcija */}
         <header className="mb-12 border-l-4 border-orange-600 pl-6">
           <h2 className="text-5xl md:text-7xl font-black uppercase italic leading-none tracking-tighter">
             Regional <br /> <span className="text-orange-600">Powder</span> Alert
@@ -46,54 +47,67 @@ export default async function Home() {
           </p>
         </header>
 
-        {/* INTERAKTIVNA MAPA SEKCIJA */}
+        {/* MAPA SEKCIJA */}
         <section className="mb-16">
           <BalkanMap resorts={resortsWithData} />
         </section>
 
-        {/* RESORT GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {/* GRID SA KARTICAMA PLANINA */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {sortedResorts.map((resort) => (
             <div 
               key={resort.id} 
-              className="group bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-6 rounded-2xl hover:shadow-2xl hover:border-orange-600 transition-all"
+              className="group bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-6 rounded-[2rem] hover:shadow-2xl hover:border-orange-600 transition-all duration-500 flex flex-col justify-between"
             >
-              <div className="flex justify-between items-start mb-6 text-left">
-                <div>
-                  <span className="text-[10px] font-black opacity-30 uppercase tracking-widest">{resort.country}</span>
-                  <h3 className="text-xl font-black uppercase italic leading-none tracking-tighter group-hover:text-orange-600 transition-colors">
-                    {resort.name}
-                  </h3>
+              <div>
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <span className="text-[10px] font-black opacity-30 uppercase tracking-widest">{resort.country}</span>
+                    <h3 className="text-2xl font-black uppercase italic leading-none tracking-tighter group-hover:text-orange-600 transition-colors">
+                      {resort.name}
+                    </h3>
+                  </div>
+                  <div className="bg-zinc-100 dark:bg-zinc-800 px-3 py-1 rounded-full">
+                    <span className="text-sm font-black italic text-orange-600">+{resort.forecast}mm</span>
+                  </div>
                 </div>
-                <div className="bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded">
-                  <span className="text-lg font-black italic text-orange-600">+{resort.forecast}mm</span>
+
+                {/* Vremenska statistika */}
+                <div className="grid grid-cols-2 gap-2 mb-6 text-center">
+                  <div className="bg-zinc-50 dark:bg-black/40 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                    <p className="text-[9px] font-bold opacity-40 uppercase mb-1">Temp</p>
+                    <p className="text-xl font-black italic">{resort.temp}°C</p>
+                  </div>
+                  <div className="bg-zinc-50 dark:bg-black/40 p-3 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                    <p className="text-[9px] font-bold opacity-40 uppercase mb-1">Wind</p>
+                    <p className="text-xl font-black italic">{resort.wind}<span className="text-[10px] ml-1 opacity-40 italic">m/s</span></p>
+                  </div>
+                </div>
+
+                {/* Progress bar za forecast */}
+                <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden mb-4">
+                  <div 
+                    className="h-full bg-orange-600 transition-all duration-1000"
+                    style={{ width: `${Math.min(resort.forecast * 5, 100)}%` }}
+                  ></div>
+                </div>
+
+                <div className="flex justify-between items-center opacity-40 text-[10px] font-bold uppercase tracking-tighter">
+                  <span>Base: {resort.current}cm</span>
+                  <span>{resort.wind > 10 ? '💨 Windy' : 'Safe'}</span>
                 </div>
               </div>
 
-              {/* Weather Stats Bar */}
-              <div className="grid grid-cols-2 gap-2 mb-6 text-center">
-                <div className="bg-zinc-50 dark:bg-black/40 p-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                  <p className="text-[9px] font-bold opacity-40 uppercase mb-1">Temp</p>
-                  <p className="text-xl font-black italic">{resort.temp}°C</p>
-                </div>
-                <div className="bg-zinc-50 dark:bg-black/40 p-3 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                  <p className="text-[9px] font-bold opacity-40 uppercase mb-1">Wind</p>
-                  <p className="text-xl font-black italic">{resort.wind}<span className="text-[10px] ml-1 opacity-40 italic">m/s</span></p>
-                </div>
-              </div>
-
-              {/* Small Progress bar */}
-              <div className="h-1 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden mb-4">
-                <div 
-                  className="h-full bg-orange-600 transition-all duration-700"
-                  style={{ width: `${Math.min(resort.forecast * 5, 100)}%` }}
-                ></div>
-              </div>
-
-              <div className="flex justify-between items-center opacity-40 text-[10px] font-bold uppercase tracking-tighter">
-                <span>Base: {resort.current}cm</span>
-                <span>{resort.wind > 10 ? '💨 Windy' : 'Safe'}</span>
-              </div>
+              {/* LIVE CAM DUGME */}
+              <a 
+                href={resort.camUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="mt-6 w-full py-4 bg-zinc-900 dark:bg-white text-white dark:text-black text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-orange-600 dark:hover:bg-orange-600 hover:text-white transition-all text-center flex items-center justify-center gap-2 shadow-lg"
+              >
+                <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
+                View Live Cam
+              </a>
             </div>
           ))}
         </div>
