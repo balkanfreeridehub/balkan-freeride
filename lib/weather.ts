@@ -1,39 +1,30 @@
 export async function getWeatherData(lat: number, lon: number) {
+  const API_KEY = 'c88c1e32ebc740b4afc200035262503';
   try {
-    // Vučemo i DAILY podatke jer su oni "zakucani" i retko su 0 ako se očekuje padavina
+    // Tražimo prognozu za 3 dana da bismo imali stabilne podatke
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&hourly=snowfall,precipitation&daily=snowfall_sum,precipitation_sum&timezone=auto`
+      `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${lat},${lon}&days=3&aqi=no&alerts=no`
     );
     const data = await res.json();
 
-    if (!data.current) return null;
+    if (!data || !data.current) return null;
 
-    const temp = data.current.temperature_2m;
-    
-    // 1. Proveravamo hourly sneg (prvih 6h)
-    const hourlySnow = data.hourly.snowfall.slice(0, 6).reduce((a: number, b: number) => a + b, 0) / 6;
-    
-    // 2. Proveravamo dnevni sneg (sumu za danas) i delimo sa 24 da dobijemo prosek po satu
-    const dailySnowAvg = (data.daily.snowfall_sum[0] || 0) / 24;
-    const dailyPrecipAvg = (data.daily.precipitation_sum[0] || 0) / 24;
+    const current = data.current;
+    const forecastToday = data.forecast.forecastday[0].day;
 
-    // FINALNA LOGIKA: 
-    // Uzmi hourly sneg. Ako je 0, uzmi dnevni prosek snega. 
-    // Ako je i to 0, a hladno je, uzmi dnevni prosek padavina (kiše).
-    let snowBase = hourlySnow;
-    if (snowBase === 0) snowBase = dailySnowAvg;
-    if (snowBase === 0 && temp < 1.5) snowBase = dailyPrecipAvg;
+    // Uzimamo direktan podatak o snegu u CM za danas i delimo sa 24 za bazu po satu
+    // WeatherAPI je ovde ekstremno precizan za planinske lokacije
+    const hourlySnowBase = (forecastToday.totalsnow_cm || 0) / 24;
 
     return {
-      temp: Math.round(temp),
-      windSpeed: Math.round(data.current.wind_speed_10m),
-      windDir: data.current.wind_direction_10m,
-      condition: data.current.weather_code,
-      // Šaljemo snowBase koji je sad skoro nemoguće da bude 0 ako ima bilo kakve prognoze
-      forecast: snowBase > 0 ? snowBase : 0 
+      temp: Math.round(current.temp_c),
+      windSpeed: Math.round(current.wind_kph / 3.6), // Konverzija km/h u m/s
+      windDir: current.wind_degree,
+      condition: current.condition.text, // Npr. "Patchy heavy snow"
+      forecast: hourlySnowBase > 0 ? hourlySnowBase : 0
     };
   } catch (e) {
-    console.error("Weather Error:", e);
+    console.error("WeatherAPI Error:", e);
     return null;
   }
 }

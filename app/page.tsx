@@ -37,22 +37,23 @@ export default function Home() {
     en: { forecast: "Forecast", cam: "Live Cam", wind: "Wind" }
   }[lang];
 
-  const getConditionText = (code: number) => {
-    if (code === 0) return lang === 'sr' ? "Vedro" : "Clear";
-    if ([1, 2, 3].includes(code)) return lang === 'sr' ? "Malo oblačno" : "Partly Cloudy";
-    if ([45, 48].includes(code)) return lang === 'sr' ? "Magla" : "Foggy";
-    if ([71, 73, 75, 77, 85, 86].includes(code)) return lang === 'sr' ? "Sneg veje" : "Snowing";
-    if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return lang === 'sr' ? "Kiša" : "Rain";
-    return lang === 'sr' ? "Oblačno" : "Cloudy";
+  const translateCondition = (text: string) => {
+    const low = text?.toLowerCase() || "";
+    if (low.includes('snow') || low.includes('blizzard')) return lang === 'sr' ? "Sneg veje" : "Snowing";
+    if (low.includes('rain')) return lang === 'sr' ? "Kiša" : "Rain";
+    if (low.includes('cloud') || low.includes('overcast')) return lang === 'sr' ? "Oblačno" : "Cloudy";
+    if (low.includes('mist') || low.includes('fog')) return lang === 'sr' ? "Magla" : "Foggy";
+    if (low.includes('sunny') || low.includes('clear')) return lang === 'sr' ? "Vedro" : "Clear";
+    return text;
   };
 
-  const getWeatherIcon = (code: number) => {
-    if (code === 0) return '☀️';
-    if ([1, 2, 3].includes(code)) return '🌤️';
-    if ([45, 48].includes(code)) return '🌫️';
-    if ([71, 73, 75, 77, 85, 86].includes(code)) return '❄️';
-    if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return '🌧️';
-    return '☁️';
+  const getWeatherIcon = (text: string) => {
+    const low = text?.toLowerCase() || "";
+    if (low.includes('snow') || low.includes('blizzard')) return '❄️';
+    if (low.includes('rain')) return '🌧️';
+    if (low.includes('cloud') || low.includes('overcast')) return '☁️';
+    if (low.includes('mist') || low.includes('fog')) return '🌫️';
+    return '☀️';
   };
 
   return (
@@ -65,7 +66,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setLang(lang === 'sr' ? 'en' : 'sr')}
-              className="text-[10px] font-black uppercase px-3 py-1 bg-slate-100 dark:bg-white/10 rounded-lg border dark:border-white/5"
+              className="text-[10px] font-black uppercase px-3 py-1 bg-slate-100 dark:bg-white/10 rounded-lg border dark:border-white/5 transition-all"
             >
               {lang === 'sr' ? 'English' : 'Srpski'}
             </button>
@@ -79,13 +80,14 @@ export default function Home() {
           <BalkanMap resorts={resorts} />
         </div>
 
+        {/* Time Selector */}
         <div className="flex flex-wrap justify-center gap-2 mb-12 p-2 bg-slate-100 dark:bg-white/5 rounded-2xl w-fit mx-auto border dark:border-white/5 shadow-inner">
           {timeOptions.map((opt) => (
             <button
               key={opt.value}
               onClick={() => setTimeframe(opt.value)}
               className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all duration-300 ${
-                timeframe === opt.value ? 'bg-blue-600 text-white shadow-lg scale-105' : 'opacity-40 hover:opacity-100'
+                timeframe === opt.value ? 'bg-blue-600 text-white shadow-lg scale-105' : 'text-slate-400 hover:text-blue-500'
               }`}
             >
               {opt.label[lang]}
@@ -95,13 +97,13 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {resorts.map((resort) => (
-            <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-8 rounded-[3rem] hover:shadow-2xl transition-all group">
+            <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-8 rounded-[3rem] hover:shadow-2xl transition-all group hover:-translate-y-1">
               <h3 className="text-2xl font-black uppercase italic mb-1 leading-none">{resort.name}</h3>
               <p className="text-[10px] font-bold text-blue-500 uppercase mb-6 tracking-widest">
-                {getConditionText(resort.condition)}
+                {translateCondition(resort.condition)}
               </p>
 
-              <div className="flex items-center justify-between bg-white dark:bg-black/20 p-5 rounded-2xl border dark:border-white/5 mb-6 shadow-sm">
+              <div className="flex items-center justify-between bg-white dark:bg-black/20 p-5 rounded-2xl border dark:border-white/5 mb-6">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{getWeatherIcon(resort.condition)}</span>
                   <span className="text-2xl font-black italic">{resort.temp}°</span>
@@ -121,7 +123,7 @@ export default function Home() {
                     {t.forecast} (+{timeOptions.find(o => o.value === timeframe)?.label[lang]})
                   </p>
                   <p className="text-5xl font-black italic">
-                    +{Math.round(parseFloat(resort.forecast || "0.1") * timeframe)} <span className="text-2xl uppercase">cm</span>
+                    +{Math.round((resort.forecast || 0) * timeframe)} <span className="text-2xl uppercase">cm</span>
                   </p>
                 </div>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="w-24 h-24 absolute -right-4 -top-4 opacity-20 group-hover:rotate-90 transition-transform duration-1000">
