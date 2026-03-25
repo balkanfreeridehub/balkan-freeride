@@ -1,16 +1,26 @@
 @import "tailwindcss";
 
-/* Osnovni stilovi bez @apply direktiva koje pucaju */
-body {
-  margin: 0;
-  padding: 0;
+:root {
+  --bg-color: #ffffff;
+  --text-color: #0f172a;
+  --map-bg: #f1f5f9;
+  --map-stroke: #cbd5e1; /* Jači kontrast za granice u light modu */
 }
 
-/* Tanak plavi scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+.dark {
+  --bg-color: #020617;
+  --text-color: #f8fafc;
+  --map-bg: #0f172a;
+  --map-stroke: #334155;
 }
-::-webkit-scrollbar-thumb {
-  background: #3b82f6;
-  border-radius: 10px;
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: all 0.3s ease;
+  margin: 0;
 }
+
+/* Scrollbar ostaje diskretan */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
