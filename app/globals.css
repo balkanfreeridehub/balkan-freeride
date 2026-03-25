@@ -1,27 +1,19 @@
 @import "tailwindcss";
 
+/* Svetli mod (Default) */
 :root {
-  --bg: #ffffff;
-  --card: #f8fafc;
-  --border: #e2e8f0;
-  --text: #0f172a;
+  --bg-main: #ffffff;
+  --text-main: #0f172a;
 }
 
+/* Tamni mod - Forsiramo preko .dark klase na <html> tagu */
 .dark {
-  --bg: #020617;
-  --card: rgba(30, 41, 59, 0.5);
-  --border: rgba(255, 255, 255, 0.1);
-  --text: #f1f5f9;
+  --bg-main: #020617 !important;
+  --text-main: #f1f5f9 !important;
 }
 
 body {
-  background-color: var(--bg);
-  color: var(--text);
-  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(12px);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background 0.3s ease, color 0.3s ease;
 }
