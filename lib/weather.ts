@@ -1,38 +1,35 @@
 export async function getWeatherData(lat: number, lon: number) {
   const API_KEY = 'c88c1e32ebc740b4afc200035262503';
   try {
+    // Vučemo prognozu za 7 dana da bi dobili bogatije podatke
     const res = await fetch(
-      `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${lat},${lon}&days=1&aqi=no`
+      `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${lat},${lon}&days=7&aqi=no`
     );
     const data = await res.json();
 
     if (!data || !data.current) return null;
 
     const current = data.current;
-    const day = data.forecast.forecastday[0].day;
-    const temp = current.temp_c;
+    const forecastDays = data.forecast.forecastday;
     
-    // 1. Primarni izvor: Direktni sneg iz API-ja
-    let snowBase = (day.totalsnow_cm || 0) / 24;
+    // Uzimamo prosek padavina iz prvih par dana prognoze (ono što si poslao u tabeli)
+    // Sabiramo totalprecip_mm za danas i sutra i delimo da dobijemo bazu po satu
+    const totalPrecipNext48h = (forecastDays[0].day.totalprecip_mm + forecastDays[1].day.totalprecip_mm);
+    const hourlyBase = totalPrecipNext48h / 48;
 
-    // 2. Sekundarni izvor: Ako nema snega u API-ju, ali ima padavina na minusu
-    if (snowBase === 0 && (day.totalprecip_mm > 0) && temp < 2) {
-      snowBase = day.totalprecip_mm / 24;
-    }
-
-    // 3. Tercijarni izvor (Visual Fix): Ako je vlažno i hladno, dajemo 0.05cm 
-    // da sajt ne izgleda "mrtvo" dok na kamerama vidimo sneg
-    if (snowBase === 0 && current.humidity > 85 && temp < 0) {
-      snowBase = 0.05;
-    }
+    // Ako je temperatura ispod 4°C (na planini je to granica za sneg/bljuzgu), 
+    // računamo te padavine kao sneg. 
+    // Koristimo koeficijent 1.2 jer je sneg zapreminski veći od kiše (1mm kiše = ~1.2cm snega)
+    const isColdEnough = current.temp_c < 4;
+    const snowForecast = isColdEnough ? (hourlyBase * 1.2) : 0;
 
     return {
-      temp: Math.round(temp),
+      temp: Math.round(current.temp_c),
       windSpeed: Math.round(current.wind_kph / 3.6),
       windDir: current.wind_degree,
       condition: current.condition.text,
-      // Šaljemo bazu koja će se množiti u page.tsx
-      forecast: snowBase 
+      // Šaljemo izračunatu prognozu snega
+      forecast: snowForecast > 0 ? snowForecast : 0
     };
   } catch (e) {
     console.error("WeatherAPI Error:", e);
