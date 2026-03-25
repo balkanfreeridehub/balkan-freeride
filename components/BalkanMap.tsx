@@ -7,8 +7,7 @@ import {
   Marker
 } from "react-simple-maps"
 
-// Koristimo TopoJSON za Balkan koji smo imali na početku
-const geoUrl = "https://raw.githubusercontent.com/deldersveld/topojson/master/continents/europe.json"
+const geoUrl = "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/TopoJSON/europe.topojson"
 
 interface Props {
   resorts: any[]
@@ -17,20 +16,20 @@ interface Props {
 
 export default function BalkanMap({ resorts, timeframe }: Props) {
   const getStatusColor = (snow: number) => {
-    if (snow >= 100) return '#9333ea'; // Japan
-    if (snow >= 50) return '#0f172a';  // Extreme
-    if (snow >= 30) return '#00c853';  // Powder
-    if (snow >= 10) return '#ffd600';  // Rideable
-    return '#ef4444';                 // Skip
+    if (snow >= 100) return '#9333ea'; 
+    if (snow >= 50) return '#0f172a';  
+    if (snow >= 30) return '#00c853';  
+    if (snow >= 10) return '#ffd600';  
+    return '#ef4444';                 
   }
 
   return (
-    <div className="w-full h-full bg-slate-50 dark:bg-[#020617] flex items-center justify-center">
+    <div className="w-full h-full bg-slate-100 dark:bg-[#020617] flex items-center justify-center">
       <ComposableMap
         projection="geoAzimuthalEqualArea"
         projectionConfig={{
-          rotate: [-20.0, -43.0, 0],
-          scale: 3500
+          rotate: [-19.5, -43.0, 0], 
+          scale: 4800 
         }}
         style={{ width: "100%", height: "100%" }}
       >
@@ -41,12 +40,12 @@ export default function BalkanMap({ resorts, timeframe }: Props) {
                 key={geo.rsmKey}
                 geography={geo}
                 fill="currentColor"
-                className="text-slate-200 dark:text-slate-800/50"
-                stroke="#FFFFFF"
-                strokeWidth={0.5}
+                className="text-slate-200 dark:text-slate-800/40"
+                stroke="currentColor"
+                strokeWidth={1}
                 style={{
                   default: { outline: "none" },
-                  hover: { outline: "none" },
+                  hover: { fill: "#3b82f6", outline: "none", transition: "200ms" },
                   pressed: { outline: "none" },
                 }}
               />
@@ -65,17 +64,19 @@ export default function BalkanMap({ resorts, timeframe }: Props) {
 
           return (
             <Marker key={r.id} coordinates={[r.lon, r.lat]}>
-              <circle 
-                r={6} 
-                fill={getStatusColor(snow)} 
-                stroke="#fff" 
-                strokeWidth={2} 
-                className="cursor-pointer transition-transform hover:scale-150"
-              />
+              <circle r={6} fill={getStatusColor(snow)} stroke="#fff" strokeWidth={2} className="cursor-pointer" />
               <text
                 textAnchor="middle"
                 y={-12}
-                style={{ fontSize: "8px", fontWeight: "bold", fill: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px" }}
+                className="font-black pointer-events-none"
+                style={{ 
+                  fontSize: "9px", 
+                  fill: "#1e293b",
+                  textTransform: "uppercase",
+                  paintOrder: "stroke",
+                  stroke: "#ffffff",
+                  strokeWidth: "2.5px"
+                }}
               >
                 {r.name}
               </text>
