@@ -1,10 +1,16 @@
 "use client"
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic'; // Dodajemo dynamic import
 import { balkanResorts } from '../data/resorts';
 import { getWeatherData } from '../lib/weather';
 import ThemeToggle from '../components/ThemeToggle';
-import BalkanMap from '../components/BalkanMap';
 import LiveCamModal from '../components/LiveCamModal';
+
+// Dinamički uvoz mape - isključujemo SSR (Server Side Rendering)
+const BalkanMap = dynamic(() => import('../components/BalkanMap'), { 
+  ssr: false,
+  loading: () => <div className="h-full w-full bg-slate-100 dark:bg-slate-800 animate-pulse flex items-center justify-center font-black uppercase italic opacity-20">Učitavam mapu...</div>
+});
 
 const timeOptions = [
   { label: '6h', value: 6 },
@@ -79,11 +85,11 @@ export default function Home() {
   }, [timeframe]);
 
   const getFreerideStatus = (snow: number) => {
-    if (snow >= 100) return { cls: 'bg-purple-600 text-white', label: 'JAPAN STYLE 🇯🇵', color: '#9333ea' };
-    if (snow >= 50) return { cls: 'bg-slate-900 text-white border border-white/20', label: 'EXTREME POWDER 💀', color: '#0f172a' };
-    if (snow >= 30) return { cls: 'bg-[#00c853] text-white', label: 'POWDER ALERT ❄️', color: '#00c853' };
-    if (snow >= 10) return { cls: 'bg-[#ffd600] text-black', label: 'RIDEABLE', color: '#ffd600' };
-    return { cls: 'bg-[#d50000] text-white', label: 'SKIP', color: '#d50000' };
+    if (snow >= 100) return { cls: 'bg-purple-600 text-white', label: 'JAPAN STYLE 🇯🇵' };
+    if (snow >= 50) return { cls: 'bg-slate-900 text-white border border-white/20', label: 'EXTREME POWDER 💀' };
+    if (snow >= 30) return { cls: 'bg-[#00c853] text-white', label: 'POWDER ALERT ❄️' };
+    if (snow >= 10) return { cls: 'bg-[#ffd600] text-black', label: 'RIDEABLE' };
+    return { cls: 'bg-[#d50000] text-white', label: 'SKIP' };
   };
 
   return (
@@ -147,7 +153,7 @@ export default function Home() {
               const status = getFreerideStatus(calcSnow);
 
               return (
-                <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-7 rounded-[3rem] shadow-sm flex flex-col h-full transition-all hover:shadow-xl">
+                <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-7 rounded-[3rem] shadow-sm flex flex-col h-full transition-all hover:shadow-xl group">
                   
                   <div className="h-20 mb-4">
                     <div className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black mb-3 uppercase tracking-tighter shadow-sm ${status.cls}`}>
@@ -157,7 +163,7 @@ export default function Home() {
                     <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest mt-1">{resort.country}</p>
                   </div>
 
-                  <div className="h-44 bg-blue-600 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl shadow-blue-600/30 mb-6 flex flex-col justify-center">
+                  <div className="h-44 bg-blue-600 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl shadow-blue-600/30 mb-6 flex flex-col justify-center transition-transform group-hover:scale-[1.02]">
                     <div className="relative z-10">
                       <p className="text-[10px] font-black uppercase opacity-70 mb-1 italic tracking-widest">{t.snowfall} (+{timeframe < 24 ? timeframe + 'h' : timeframe/24 + 'd'})</p>
                       <p className="text-5xl font-black italic mb-3 tracking-tighter">
@@ -181,14 +187,14 @@ export default function Home() {
                     </div>
 
                     <div className="bg-white dark:bg-white/5 rounded-3xl border dark:border-white/5 flex flex-col items-center justify-center shadow-sm">
-                      <div className="text-4xl font-black" style={{ transform: `rotate(${resort.current.windDir}deg)`, transition: 'transform 2s' }}>↑</div>
-                      <span className="text-[11px] font-black mt-1">{resort.current.windSpeed} <span className="opacity-40 font-normal">m/s</span></span>
+                      <div className="text-4xl font-black" style={{ transform: `rotate(${resort.current.windDir}deg)`, transition: 'transform 2s cubic-bezier(0.16, 1, 0.3, 1)' }}>↑</div>
+                      <span className="text-[11px] font-black mt-1">{resort.current.windSpeed} <span className="opacity-40 font-normal tracking-tighter">m/s</span></span>
                     </div>
                   </div>
 
                   <button 
                     onClick={() => setSelectedResort(resort)}
-                    className="mt-auto w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-500 transition-all shadow-lg shadow-black/5"
+                    className="mt-auto w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-500 transition-all shadow-lg active:scale-95"
                   >
                     {t.cams}
                   </button>
