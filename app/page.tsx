@@ -1,6 +1,5 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { balkanResorts } from '../data/resorts';
 import { getWeatherData } from '../lib/weather';
 import ThemeToggle from '../components/ThemeToggle';
@@ -14,6 +13,18 @@ const timeOptions = [
   { label: '3d', value: 72 },
   { label: '10d', value: 240 }
 ];
+
+// Pomoćna funkcija za ikonice vremena na osnovu WMO koda
+const getWeatherIcon = (code: number) => {
+  if (code === 0) return "☀️";
+  if (code <= 3) return "🌤️";
+  if (code <= 48) return "🌫️";
+  if (code <= 67) return "🌧️";
+  if (code <= 77) return "❄️";
+  if (code <= 82) return "🌦️";
+  if (code <= 86) return "🌨️";
+  return "🌩️";
+};
 
 export default function Home() {
   const [lang, setLang] = useState<'sr' | 'en'>('sr');
@@ -55,7 +66,6 @@ export default function Home() {
             Balkan <span className="text-blue-600">Freeride</span> Hub
           </h1>
           <div className="flex items-center gap-3">
-            <Link href="/test" className="text-[10px] font-black uppercase px-3 py-1.5 bg-slate-100 dark:bg-white/10 rounded-lg hover:bg-blue-600 hover:text-white transition-all">Lab 🧪</Link>
             <button onClick={() => setLang(lang === 'sr' ? 'en' : 'sr')} className="text-[10px] font-black uppercase px-3 py-1.5 bg-slate-100 dark:bg-white/10 rounded-lg border dark:border-white/5">
                 {lang === 'sr' ? 'EN' : 'SR'}
             </button>
@@ -85,12 +95,11 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {loading ? (
-            <div className="col-span-full text-center py-20 font-black uppercase italic opacity-20 animate-pulse tracking-widest">Skeniranje Balkana...</div>
+            <div className="col-span-full text-center py-20 font-black uppercase italic opacity-20 animate-pulse tracking-widest uppercase">Učitavam planine...</div>
           ) : (
             resorts.map((resort) => {
               if (!resort.hourly) return null;
 
-              // --- NAPREDNA BALKAN SLR MATEMATIKA ---
               let calcSnow = 0;
               let calcRain = 0;
               for (let i = 0; i < timeframe; i++) {
@@ -108,6 +117,8 @@ export default function Home() {
 
               return (
                 <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-8 rounded-[3rem] hover:shadow-2xl transition-all group relative overflow-hidden">
+                  
+                  {/* GORNJI DEO KARTICE */}
                   <div className="flex justify-between items-start mb-6">
                     <div>
                       <div className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black mb-3 uppercase tracking-tighter shadow-sm ${status.cls}`}>
@@ -116,34 +127,48 @@ export default function Home() {
                       <h3 className="text-2xl font-black uppercase italic leading-none">{resort.name}</h3>
                       <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest mt-1">{resort.country}</p>
                     </div>
-                    <span className="text-3xl opacity-50 group-hover:opacity-100 transition-opacity">🏔️</span>
+                    {/* Trenutna vremenska ikonica */}
+                    <div className="text-4xl bg-white dark:bg-white/5 w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm border dark:border-white/5">
+                        {getWeatherIcon(resort.weatherCode || 0)}
+                    </div>
                   </div>
 
+                  {/* INFO GRID */}
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="bg-white dark:bg-black/20 p-4 rounded-2xl border dark:border-white/5 shadow-sm">
-                        <p className="text-[8px] font-black uppercase opacity-40 mb-1">Temp</p>
+                        <p className="text-[8px] font-black uppercase opacity-40 mb-1 tracking-widest">Temperatura</p>
                         <p className="text-2xl font-black italic">{resort.current.temp}°C</p>
                     </div>
-                    <div className="bg-white dark:bg-black/20 p-4 rounded-2xl border dark:border-white/5 shadow-sm">
-                        <p className="text-[8px] font-black uppercase opacity-40 mb-1">Vetar</p>
-                        <p className="text-2xl font-black italic">{resort.current.windSpeed} <span className="text-xs">m/s</span></p>
+                    <div className="bg-white dark:bg-black/20 p-4 rounded-2xl border dark:border-white/5 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p className="text-[8px] font-black uppercase opacity-40 mb-1 tracking-widest">Vetar</p>
+                            <p className="text-2xl font-black italic">{resort.current.windSpeed}<span className="text-xs ml-1">m/s</span></p>
+                        </div>
+                        {/* Pravac vetra - strelica */}
+                        <div 
+                          className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm shadow-lg shadow-blue-600/30"
+                          style={{ transform: `rotate(${resort.current.windDir}deg)`, transition: 'transform 1.5s ease-in-out' }}
+                        >
+                          ↑
+                        </div>
                     </div>
                   </div>
 
+                  {/* SNOW BOX */}
                   <div className="mb-8 bg-blue-600 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl shadow-blue-600/30">
                     <div className="relative z-10">
-                      <p className="text-[10px] font-black uppercase opacity-70 mb-1 italic">Sneg (+{timeframe}h)</p>
+                      <p className="text-[10px] font-black uppercase opacity-70 mb-1 italic tracking-widest">Padavine (+{timeframe}h)</p>
                       <p className="text-5xl font-black italic">
                         +{calcSnow.toFixed(1)} <span className="text-2xl uppercase font-normal">cm</span>
                       </p>
-                      {calcRain > 0 && (
-                        <p className="text-[9px] font-bold mt-2 bg-black/20 w-fit px-2 py-0.5 rounded-full border border-white/10">
-                          ⚠️ Moguća kiša: {calcRain.toFixed(1)} mm
+                      {calcRain > 1 && (
+                        <p className="text-[9px] font-bold mt-3 bg-red-500/30 w-fit px-3 py-1 rounded-full border border-white/20 backdrop-blur-sm">
+                          🌧️ {calcRain.toFixed(1)} mm KIŠE
                         </p>
                       )}
                     </div>
                     {status.label === 'POWDER ALERT' && (
-                        <div className="absolute -right-2 -bottom-2 opacity-10 text-8xl rotate-12">❄️</div>
+                        <div className="absolute -right-2 -bottom-2 opacity-10 text-8xl rotate-12 pointer-events-none">❄️</div>
                     )}
                   </div>
 
