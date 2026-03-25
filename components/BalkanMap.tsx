@@ -7,7 +7,7 @@ const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
 
 export default function BalkanMap({ resorts }: { resorts: any[] }) {
   return (
-    <div className="relative w-full h-[500px] bg-blue-50/30 dark:bg-black/20">
+    <div className="relative w-full h-[450px] bg-blue-100 dark:bg-slate-950">
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{ center: [20, 44], scale: 3500 }}
@@ -20,9 +20,9 @@ export default function BalkanMap({ resorts }: { resorts: any[] }) {
                 key={geo.rsmKey}
                 geography={geo}
                 fill="currentColor"
-                className="text-white dark:text-zinc-900 stroke-blue-100 dark:stroke-zinc-800"
-                strokeWidth={0.5}
-                style={{ default: { outline: "none" }, hover: { fill: "#f1f5f9", outline: "none" } }}
+                className="text-white dark:text-slate-900 stroke-blue-200 dark:stroke-blue-900/50"
+                strokeWidth={1}
+                style={{ default: { outline: "none" } }}
               />
             ))
           }
@@ -30,8 +30,10 @@ export default function BalkanMap({ resorts }: { resorts: any[] }) {
 
         {resorts.map((resort) => (
           <Marker key={resort.id} coordinates={[resort.lon, resort.lat]}>
-            <circle r={resort.forecast > 0 ? 15 : 0} fill="#3b82f6" opacity={0.2} className="animate-ping" />
-            <circle r={6} fill="#3b82f6" stroke="#fff" strokeWidth={2} />
+            <circle r={8} fill="#3b82f6" stroke="#fff" strokeWidth={2} />
+            <text textAnchor="middle" y={-15} className="fill-slate-400 dark:fill-slate-500 text-[9px] font-bold uppercase tracking-tighter pointer-events-none">
+              {resort.name}
+            </text>
           </Marker>
         ))}
       </ComposableMap>
