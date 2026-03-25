@@ -1,19 +1,20 @@
-export async function getWeatherData(locationId: string) {
+export async function getWeatherData(lat: number, lon: number) {
   try {
-    const res = await fetch(`/api/weather?id=${locationId}`);
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=snowfall,precipitation,temperature_2m,windspeed_10m&current_weather=true&timezone=auto`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("API Error");
     const data = await res.json();
-    
-    // DEBUGGER: Ispisuje u konzolu tačno šta je stiglo za svaku planinu
-    console.log(`%c [Weather Debug] Podaci za ${locationId}:`, 'color: #8b57ff; font-weight: bold', {
-      temp: data.temp,
-      days: data.dailyForecast?.length,
-      firstDayPrecip: data.dailyForecast?.[0]?.precip
-    });
 
-    return data;
+    return {
+      current: {
+        temp: Math.round(data.current_weather.temperature),
+        windSpeed: Math.round(data.current_weather.windspeed / 3.6), // km/h u m/s
+        windDir: data.current_weather.winddirection,
+      },
+      hourly: data.hourly
+    };
   } catch (e) {
-    console.error(`%c [Weather Error] Neuspelo učitavanje za ${locationId}:`, 'color: red; font-weight: bold', e);
+    console.error("Open-Meteo Error:", e);
     return null;
   }
 }
