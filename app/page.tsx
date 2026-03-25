@@ -52,7 +52,7 @@ export default function Home() {
     if (snow >= 50) return { cls: 'bg-slate-900', txt: 'EXTREME POWDER', icon: <Skull className="w-3.5 h-3.5" /> };
     if (snow >= 30) return { cls: 'bg-green-500', txt: 'POWDER ALERT', icon: <Snowflake className="w-3.5 h-3.5" /> };
     if (snow >= 10) return { cls: 'bg-yellow-400 text-black', txt: 'RIDEABLE', icon: <Zap className="w-3.5 h-3.5" /> };
-    return { cls: 'bg-red-500', txt: 'SKIP', icon: <CircleSlash className="w-3.5 h-3.5" /> };
+    return { cls: 'bg-red-500 text-white', txt: 'SKIP', icon: <CircleSlash className="w-3.5 h-3.5" /> };
   };
 
   return (
@@ -76,7 +76,7 @@ export default function Home() {
           <BalkanMap resorts={resorts} timeframe={timeframe} />
         </div>
 
-        <div className="flex flex-wrap justify-center gap-2 mb-12 p-2 bg-slate-100 dark:bg-white/5 rounded-2xl w-fit mx-auto border dark:border-white/10 shadow-inner">
+        <div className="flex flex-wrap justify-center gap-2 mb-12 p-2 bg-slate-100 dark:bg-white/5 rounded-2xl w-fit mx-auto border dark:border-white/10">
           {timeOptions.map((opt) => (
             <button key={opt.value} onClick={() => setTimeframe(opt.value)}
               className={`px-5 py-2.5 rounded-xl text-[11px] font-black uppercase transition-all ${timeframe === opt.value ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-blue-500'}`}>
@@ -88,17 +88,28 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {!loading && resorts.map((resort) => {
             let calcSnow = 0, calcRain = 0, totalP = 0;
-            for (let i = 0; i < timeframe; i++) {
-              const t = resort.hourly.temperature_2m[i], p = resort.hourly.precipitation[i] || 0;
-              totalP += p;
-              if (p > 0) {
-                if (t <= 0) calcSnow += p; else calcRain += p;
+            
+            // NOVA MATEMATIKA KOEFICIJENATA
+            if (resort.hourly) {
+              for (let i = 0; i < timeframe; i++) {
+                const t = resort.hourly.temperature_2m[i];
+                const p = resort.hourly.precipitation[i] || 0;
+                totalP += p;
+                
+                if (p > 0) {
+                  if (t <= -5) calcSnow += p * 1.5;      // Suv sneg (viši koeficijent)
+                  else if (t <= 0) calcSnow += p * 1.0;   // Standardni sneg
+                  else if (t <= 2) calcSnow += p * 0.5;   // Vlažan sneg/susnežica
+                  else calcRain += p;                     // Čista kiša
+                }
               }
             }
+            
             const s = getStatus(calcSnow);
 
             return (
               <div key={resort.id} className="bg-slate-50 dark:bg-white/5 border dark:border-white/10 p-7 rounded-[3.5rem] flex flex-col h-full hover:shadow-xl transition-all">
+                {/* Header sa statusom */}
                 <div className="h-24 mb-4">
                   <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase mb-4 ${s.cls} text-white ${s.txt === 'RIDEABLE' ? 'text-black' : ''}`}>
                     {s.icon} {s.txt}
@@ -107,32 +118,33 @@ export default function Home() {
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{resort.country}</p>
                 </div>
 
+                {/* Snow Box */}
                 <div className="h-44 bg-blue-600 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-xl shadow-blue-600/30 mb-8 flex flex-col justify-center">
                   <p className="text-[10px] font-black uppercase opacity-60 mb-2">Prognoza Snega (+{timeframe}h)</p>
                   <p className="text-6xl font-black italic tracking-tighter">+{calcSnow.toFixed(1)} <span className="text-2xl font-normal opacity-40 uppercase ml-1">cm</span></p>
                   
-                  {/* SREĐEN RED ZA PADAVINE - DISKRETNIJI I LEPŠI */}
                   <div className="flex gap-4 mt-4 pt-4 border-t border-white/10 text-[10px] font-black uppercase tracking-tighter opacity-70">
                     <div className="flex items-center gap-1.5"><Droplets className="w-3 h-3 text-blue-200" /> Ukupno: {totalP.toFixed(1)}mm</div>
                     {calcRain > 0 && <div className="text-red-200">Kiša: {calcRain.toFixed(1)}mm</div>}
                   </div>
                 </div>
 
+                {/* Triple Box (Sređen razmak i bold) */}
                 <div className="grid grid-cols-3 gap-3 mb-10 text-center font-bold">
                   <div className="bg-white dark:bg-white/5 rounded-[2rem] border dark:border-white/5 h-24 flex items-center justify-center shadow-sm">
                     <WeatherVisual code={resort.current.weatherCode} />
                   </div>
                   <div className="bg-white dark:bg-white/5 rounded-[2rem] border dark:border-white/5 h-24 flex flex-col items-center justify-center">
                     <Thermometer className="w-4 h-4 mb-1 text-slate-300" />
-                    <span className="text-xl">{resort.current.temp}°</span>
+                    <span className="text-xl font-bold">{resort.current.temp}°</span>
                   </div>
                   <div className="bg-white dark:bg-white/5 rounded-[2rem] border dark:border-white/5 h-24 flex flex-col items-center justify-center">
                     <Navigation2 className="w-4 h-4 mb-1 text-blue-600 fill-blue-600" style={{ transform: `rotate(${resort.current.windDir}deg)`, transition: '2s' }} />
-                    <span className="text-xl tracking-tighter">{resort.current.windSpeed}<span className="text-[9px] font-normal opacity-30 ml-0.5 uppercase">m/s</span></span>
+                    <span className="text-xl font-bold tracking-tighter">{resort.current.windSpeed}<span className="text-[9px] font-normal opacity-30 ml-0.5 uppercase">m/s</span></span>
                   </div>
                 </div>
 
-                <button onClick={() => setSelectedResort(resort)} className="mt-auto w-full py-6 bg-slate-900 dark:bg-white text-white dark:text-black font-black uppercase text-[11px] tracking-[0.3em] rounded-2xl hover:bg-blue-600 transition-all italic">
+                <button onClick={() => setSelectedResort(resort)} className="mt-auto w-full py-6 bg-slate-900 dark:bg-white text-white dark:text-black font-black uppercase text-[11px] tracking-[0.3em] rounded-2xl hover:bg-blue-600 transition-all italic shadow-md active:scale-95">
                   UŽIVO KAMERE
                 </button>
               </div>

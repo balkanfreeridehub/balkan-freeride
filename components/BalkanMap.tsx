@@ -16,7 +16,7 @@ export default function BalkanMap({ resorts, timeframe }: Props) {
         projection="geoAzimuthalEqualArea"
         projectionConfig={{
           rotate: [-19.2, -43.2, 0], 
-          scale: 6500 // Ekstreman zoom na tvoju regiju
+          scale: 7500 // Ekstreman zoom na tvoju regiju
         }}
         style={{ width: "100%", height: "100%" }}
       >
