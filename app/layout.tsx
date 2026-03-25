@@ -1,11 +1,11 @@
-import { ThemeProvider } from "../components/ThemeProvider"
+import { Providers } from "../components/Providers"
 import "./globals.css"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )
