@@ -4,15 +4,15 @@ import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps
 
 const geoUrl = "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/TopoJSON/europe.topojson"
 
-export default function BalkanMap({ resorts = [], timeframe, onSelect, getStatus }: { resorts: any[], timeframe: number, onSelect: (resort: any) => void, getStatus: any }) {
+export default function BalkanMap({ resorts = [], timeframe, onSelect, getStatus }: any) {
   const [hovered, setHovered] = useState<any>(null);
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-slate-200 dark:bg-[#050b1a]">
+    <div className="relative w-full h-full bg-slate-200 dark:bg-[#050b1a] overflow-hidden">
       <ComposableMap 
         projection="geoAzimuthalEqualArea" 
-        // Centrirano na Balkan (Kolašin region) da se vide i MK planine
-        projectionConfig={{ rotate: [-19.5, -42.5, 0], scale: 14000 }} 
+        // Rotacija -41.0 spušta mapu niže (centrira MK i CG bolje)
+        projectionConfig={{ rotate: [-19.5, -41.0, 0], scale: 12500 }} 
         style={{ width: "100%", height: "100%" }}
       >
         <Geographies geography={geoUrl}>
@@ -21,65 +21,51 @@ export default function BalkanMap({ resorts = [], timeframe, onSelect, getStatus
               key={geo.rsmKey} 
               geography={geo} 
               fill="currentColor" 
-              // Jači kontrast pozadine
-              className="text-white dark:text-[#0f172a]" 
+              className="text-white dark:text-[#0f172a] outline-none" 
               stroke="#64748b" 
               strokeWidth={0.5} 
-              style={{ default: { outline: "none" } }} 
             />
           ))}
         </Geographies>
         
-        {resorts.map((r) => {
-          let calcSnow = 0;
+        {resorts.map((r: any) => {
+          let snow = 0;
           if (r?.hourly?.precipitation) {
             for (let i = 0; i < timeframe; i++) {
-              if (r.hourly.precipitation[i] > 0 && r.hourly.temperature_2m[i] <= 1) calcSnow += r.hourly.precipitation[i] * 1.2;
+              if (r.hourly.precipitation[i] > 0 && r.hourly.temperature_2m[i] <= 1) snow += r.hourly.precipitation[i] * 1.2;
             }
           }
-          const status = getStatus(calcSnow);
+          const s = getStatus(snow);
 
           return (
-            <React.Fragment key={r.id}>
-              <Marker 
-                coordinates={[r.lon, r.lat]} 
-                onMouseEnter={() => setHovered({ ...r, calcSnow, status })} 
-                onMouseLeave={() => setHovered(null)} 
-                onClick={() => onSelect(r)} 
-                className="cursor-pointer outline-none group"
-              >
-                <circle r={9} fill={status.color} stroke="#fff" strokeWidth={2.5} className="transition-all duration-300 group-hover:scale-150" />
-                {/* Ime planine - fiksno, bez promene boje na hover */}
-                <text textAnchor="middle" y={24} className="text-[10px] font-black uppercase fill-slate-600 dark:fill-slate-400 pointer-events-none tracking-tighter">
+            <g key={r.id} onMouseEnter={() => setHovered({...r, snow, s})} onMouseLeave={() => setHovered(null)}>
+              {/* Nevidljiva zona klika oko markera */}
+              <circle cx={0} cy={0} r={20} fill="transparent" className="cursor-pointer" />
+              
+              <Marker coordinates={[r.lon, r.lat]} onClick={() => onSelect(r)} className="cursor-pointer outline-none">
+                <circle r={10} fill={s.color} stroke="#fff" strokeWidth={3} className="transition-transform hover:scale-150" />
+                <text textAnchor="middle" y={25} className="text-[10px] font-black uppercase fill-slate-500 pointer-events-none">
                   {r.name}
                 </text>
               </Marker>
 
               {hovered?.id === r.id && (
-                <Marker coordinates={[r.lon, r.lat]}>
-                  <g transform="translate(-80, -135)">
-                    {/* Nevidljivi most koji omogućava prelazak miša na tooltip */}
-                    <rect width="160" height="140" fill="transparent" className="pointer-events-auto" onMouseEnter={() => setHovered(hovered)} onMouseLeave={() => setHovered(null)} />
-                    <foreignObject width="160" height="120" style={{ overflow: 'visible' }}>
-                      <div 
-                        className="bg-white dark:bg-slate-900 p-5 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.3)] rounded-[2.5rem] flex flex-col items-center pointer-events-auto cursor-pointer border-2 border-slate-100 dark:border-white/5 animate-in fade-in zoom-in duration-150" 
-                        onClick={() => onSelect(r)}
-                      >
-                        <div className="w-12 h-1.5 rounded-full mb-3" style={{ backgroundColor: hovered.status.color }} />
-                        <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">{hovered.name}</span>
-                        <span className="text-3xl font-black mt-1 tabular-nums" style={{ color: hovered.status.color }}>
-                          +{hovered.calcSnow.toFixed(1)}
-                        </span>
-                        <span className="text-[8px] font-bold uppercase opacity-50">Click for details</span>
-                      </div>
-                    </foreignObject>
-                  </g>
-                </Marker>
+                <g transform="translate(0, -10)" onClick={() => onSelect(r)} className="cursor-pointer">
+                  {/* Invisible bridge da hover ne nestane dok idete ka tooltipu */}
+                  <rect x="-60" y="-100" width="120" height="100" fill="transparent" />
+                  <foreignObject x="-75" y="-120" width="150" height="100" style={{ overflow: 'visible' }}>
+                    <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-4 shadow-2xl border border-black/5 flex flex-col items-center animate-in fade-in zoom-in duration-200">
+                       <div className="w-8 h-1 rounded-full mb-2" style={{ backgroundColor: s.color }} />
+                       <span className="text-[10px] font-black uppercase text-slate-400">{r.name}</span>
+                       <span className="text-2xl font-black tabular-nums" style={{ color: s.color }}>+{snow.toFixed(1)}cm</span>
+                    </div>
+                  </foreignObject>
+                </g>
               )}
-            </React.Fragment>
-          )
+            </g>
+          );
         })}
       </ComposableMap>
     </div>
-  )
+  );
 }
