@@ -18,9 +18,13 @@ const timeOptions = [
 ];
 
 const translations = {
-  sr: { hub: "Freeride Hub", live: "UŽIVO KAMERE", snow: "Prognoza snega", total: "Ukupno", rain: "Kiša", scanning: "Skeniranje Balkana..." },
-  en: { hub: "Freeride Hub", live: "LIVE CAMS", snow: "Snow Forecast", total: "Total", rain: "Rain", scanning: "Scanning Balkans..." }
+  sr: { hub: "Freeride Hub", live: "UŽIVO KAMERE", snow: "Prognoza snega", total: "Ukupno", rain: "Kiša", scanning: "Skeniranje Balkana...", error: "Greška..." },
+  en: { hub: "Freeride Hub", live: "LIVE CAMS", snow: "Snow Forecast", total: "Total", rain: "Rain", scanning: "Scanning Balkans...", error: "Error..." }
 };
+
+// SVG ZASTAVE - Da bi se sigurno videle na Vercelu
+const FlagSRB = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 24" className="w-5 h-5 rounded-full"><path fill="#C6363C" d="M0 0h36v8H0z"/><path fill="#fff" d="M0 8h36v8H0z"/><path fill="#2D4D8F" d="M0 16h36v8H0z"/></svg>;
+const FlagUSA = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 24" className="w-5 h-5 rounded-full"><path fill="#fff" d="M0 0h36v24H0z"/><path fill="#B22234" d="M0 0h36v1.8H0zm0 3.6h36v1.8H0zm0 3.6h36v1.8H0zm0 3.6h36v1.8H0zm0 3.6h36v1.8H0zm0 3.6h36v1.8H0z"/><path fill="#3C3B6E" d="M0 0h14.4v12.6H0z"/></svg>;
 
 const WeatherVisual = ({ code }: { code?: number }) => {
   if (code === undefined) return <CloudFog className="w-8 h-8 opacity-20" />;
@@ -68,13 +72,13 @@ export default function Home() {
           </h1>
           
           <div className="flex items-center gap-6">
-            {/* Language Switcher - Prikazuje samo drugu zastavicu */}
+            {/* Language Switcher - Prikazuje samo DRUGU zastavicu */}
             <button 
               onClick={() => setLang(lang === 'sr' ? 'en' : 'sr')}
-              className="text-2xl hover:scale-125 transition-transform active:scale-90"
-              title={lang === 'sr' ? 'Switch to English' : 'Prebaci na Srpski'}
+              className="hover:scale-125 transition-transform active:scale-90"
+              title={lang === 'sr' ? 'Prebaci na ENG' : 'Prebaci na SRB'}
             >
-              {lang === 'sr' ? '🇺🇸' : '🇷🇸'}
+              {lang === 'sr' ? <FlagUSA /> : <FlagSRB />}
             </button>
             <ThemeToggle />
           </div>
@@ -82,15 +86,14 @@ export default function Home() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-6 py-10">
-        {/* Mapa - Oštre ivice, čistiji dizajn */}
-        <div className="overflow-hidden mb-12 shadow-2xl h-[550px] bg-slate-100 dark:bg-white/5 ring-1 ring-black/10 dark:ring-white/10">
+        <div className="overflow-hidden mb-12 shadow-2xl h-[550px] bg-white dark:bg-white/5 ring-1 ring-black/10 dark:ring-white/10">
           <BalkanMap resorts={resorts} timeframe={timeframe} />
         </div>
 
         <div className="flex flex-wrap justify-center gap-2 mb-16 p-2 bg-white dark:bg-white/5 rounded-[2.2rem] w-fit mx-auto shadow-xl ring-1 ring-black/5 dark:ring-white/5">
           {timeOptions.map((opt) => (
             <button key={opt.value} onClick={() => setTimeframe(opt.value)}
-              className={`px-6 py-3 rounded-[1.8rem] text-[11px] font-black uppercase transition-all duration-300 ${timeframe === opt.value ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'}`}>
+              className={`px-6 py-3 rounded-[1.8rem] text-[11px] font-black uppercase transition-all duration-300 ${timeframe === opt.value ? 'bg-blue-600 text-white shadow-lg scale-105' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'}`}>
               {opt.label}
             </button>
           ))}
@@ -111,9 +114,7 @@ export default function Home() {
                     if (t_v <= 1) { 
                       const ratio = t_v <= -5 ? 1.5 : (t_v <= 0 ? 1.2 : 0.8);
                       calcSnow += p * ratio;
-                    } else {
-                      calcRain += p;
-                    }
+                    } else { calcRain += p; }
                   }
                 }
               }
@@ -134,21 +135,21 @@ export default function Home() {
                     <p className="text-6xl font-black italic tracking-tighter">+{calcSnow.toFixed(1)} <span className="text-xl font-normal opacity-40 uppercase ml-1">cm</span></p>
                     <div className="flex gap-4 mt-4 pt-4 border-t border-white/20 text-[11px] font-black uppercase">
                       <span>{t.total}: {totalP.toFixed(1)}mm</span>
-                      {calcRain > 0 && <span className="text-red-300">!! {t.rain}: {calcRain.toFixed(1)}mm</span>}
+                      {calcRain > 0 && <span className="text-red-300 underline underline-offset-4 decoration-2">!! {t.rain}: {calcRain.toFixed(1)}mm</span>}
                     </div>
                   </div>
 
-                  {/* Tri boxa - SREĐEN DIZAJN (bez crnog outline-a, ista visina) */}
+                  {/* TRI BOXA - SADA SVI IMAJU ISTI SHADOW-INNER EFEKAT */}
                   <div className="grid grid-cols-3 gap-3 mb-8 text-center">
-                    <div className="bg-slate-50 dark:bg-white/5 rounded-[1.5rem] h-24 flex items-center justify-center shadow-inner ring-1 ring-black/[0.03] dark:ring-white/[0.05]">
+                    <div className="bg-slate-50 dark:bg-white/5 rounded-[1.5rem] h-24 flex items-center justify-center shadow-inner">
                       <WeatherVisual code={resort.current?.weatherCode} />
                     </div>
-                    <div className="bg-slate-50 dark:bg-white/5 rounded-[1.5rem] h-24 flex flex-col items-center justify-center ring-1 ring-black/[0.03] dark:ring-white/[0.05]">
-                      <Thermometer className="w-4 h-4 mb-1 text-slate-400" />
+                    <div className="bg-slate-50 dark:bg-white/5 rounded-[1.5rem] h-24 flex flex-col items-center justify-center shadow-inner">
+                      <Thermometer className="w-4 h-4 mb-1 text-slate-400 opacity-60" />
                       <span className="text-xl font-black">{resort.current?.temp ?? '--'}°</span>
                     </div>
-                    <div className="bg-slate-50 dark:bg-white/5 rounded-[1.5rem] h-24 flex flex-col items-center justify-center ring-1 ring-black/[0.03] dark:ring-white/[0.05]">
-                      <Navigation2 className="w-4 h-4 mb-1 text-blue-600 fill-blue-600" style={{ transform: `rotate(${resort.current?.windDir ?? 0}deg)` }} />
+                    <div className="bg-slate-50 dark:bg-white/5 rounded-[1.5rem] h-24 flex flex-col items-center justify-center shadow-inner">
+                      <Navigation2 className="w-4 h-4 mb-1 text-blue-600 fill-blue-600" style={{ transform: `rotate(${resort.current?.windDir ?? 0}deg)`, transition: '2s' }} />
                       <span className="text-lg font-black tracking-tighter">{resort.current?.windSpeed ?? '--'} <span className="text-[9px] opacity-30">m/s</span></span>
                     </div>
                   </div>

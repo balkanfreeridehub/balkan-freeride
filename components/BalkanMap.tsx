@@ -2,16 +2,28 @@
 import React from "react"
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps"
 
+// TopoJSON sa boljim granicama Evrope
 const geoUrl = "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/TopoJSON/europe.topojson"
 
 export default function BalkanMap({ resorts, timeframe }: { resorts: any[], timeframe: number }) {
+  
+  // Dinamička boja na mapi na osnovu količine snega
+  const getMapMarkerColor = (snow: number) => {
+    if (snow >= 100) return '#fbbf24'; // Japan Style - Zlatna
+    if (snow >= 50)  return '#9333ea'; // Deep Powder - Ljubičasta
+    if (snow >= 20)  return '#4f46e5'; // Powder Day - Indigo
+    if (snow >= 10)  return '#22c55e'; // Rideable - Zelena
+    if (snow >= 3)   return '#f59e0b'; // Maybe - Narandžasta
+    return '#ef4444';                 // Skip - Crvena
+  }
+
   return (
-    <div className="w-full h-full bg-slate-50 dark:bg-[#020617] flex items-center justify-center">
+    <div className="w-full h-full bg-slate-100 dark:bg-[#020617] flex items-center justify-center">
       <ComposableMap
         projection="geoAzimuthalEqualArea"
         projectionConfig={{
-          rotate: [-19.5, -42.8, 0], // Malo "južnije" centrirano
-          scale: 12500 // Još veći zoom
+          rotate: [-19.5, -42.8, 0], // Centrirano na Balkan
+          scale: 12500 // Zoom
         }}
         style={{ width: "100%", height: "100%" }}
       >
@@ -22,13 +34,13 @@ export default function BalkanMap({ resorts, timeframe }: { resorts: any[], time
                 key={geo.rsmKey}
                 geography={geo}
                 fill="currentColor"
-                className="text-slate-200 dark:text-slate-800/20"
-                stroke="currentColor"
-                strokeWidth={0.5}
+                // JASNIE GRANICE DRŽAVA
+                className="text-white dark:text-[#020617]" // Boja unutrašnjosti
+                stroke="#d1d5db" // Jaka siva boja granice
+                strokeWidth={1.5} // Debljina granice
                 style={{ 
                   default: { outline: "none" }, 
-                  hover: { outline: "none" }, // Sklonjen hover plavi efekat
-                  pressed: { outline: "none" } 
+                  hover: { fill: "#e5e7eb", outline: "none" } 
                 }}
               />
             ))
@@ -37,17 +49,27 @@ export default function BalkanMap({ resorts, timeframe }: { resorts: any[], time
         
         {resorts.map((r) => {
           if (!r.hourly) return null;
-          let snow = 0;
-          for (let j = 0; j < timeframe; j++) {
-            const t = r.hourly.temperature_2m[j];
-            const p = r.hourly.precipitation[j] || 0;
-            if (p > 0 && t <= 0) snow += p;
+          let calcSnow = 0;
+          if (r.hourly) {
+            for (let i = 0; i < timeframe; i++) {
+              const t_v = r.hourly.temperature_2m[i], p = r.hourly.precipitation[i] || 0;
+              if (p > 0 && t_v <= 1) { 
+                const ratio = t_v <= -5 ? 1.5 : (t_v <= 0 ? 1.2 : 0.8);
+                calcSnow += p * ratio;
+              }
+            }
           }
 
           return (
             <Marker key={r.id} coordinates={[r.lon, r.lat]}>
-              <circle r={5} fill={snow >= 30 ? '#22c55e' : (snow >= 5 ? '#eab308' : '#ef4444')} stroke="#fff" strokeWidth={1.5} />
-              <text textAnchor="middle" y={-10} className="font-bold uppercase fill-slate-400 dark:fill-slate-500" style={{ fontSize: "7px" }}>
+              <circle 
+                r={6} 
+                fill={getMapMarkerColor(calcSnow)} // Dinamička boja markera
+                stroke="#fff" 
+                strokeWidth={2} 
+                className="cursor-pointer shadow-lg hover:scale-110 transition-transform" 
+              />
+              <text textAnchor="middle" y={-12} className="font-bold uppercase fill-slate-900 dark:fill-slate-100 opacity-60 pointer-events-none" style={{ fontSize: "8px" }}>
                 {r.name}
               </text>
             </Marker>
