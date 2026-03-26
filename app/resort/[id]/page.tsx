@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { balkanResorts } from '@/data/resorts';
-import { getWeatherData } from '@/lib/weather';
-import { Snowflake, Wind, Thermometer, ChevronLeft } from 'lucide-react';
+import { getWeatherData } from '../../../lib/weather'; // Relativna putanja je sigurnija za build
+import { Snowflake, Wind, Thermometer, ChevronLeft, Droplets } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ResortPage() {
