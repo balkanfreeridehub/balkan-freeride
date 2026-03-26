@@ -1,9 +1,9 @@
 "use client"
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { balkanResorts } from '../data/resorts';
 import { getWeatherData } from '../lib/weather';
-import ThemeToggle from '../components/ThemeToggle'; // Ovde ćemo promeniti dizajn dugmeta
+import ThemeToggle from '../components/ThemeToggle';
 import LiveCamModal from '../components/LiveCamModal';
 import { 
   Sun, Moon, Cloud, CloudSnow, CloudRain, Thermometer, Navigation2, 
@@ -18,8 +18,8 @@ const timeOptions = [
 ];
 
 const translations = {
-  sr: { hub: "Freeride", live: "UŽIVO KAMERE", snow: "Sneg", total: "Ukupno", rain: "Kiša", scanning: "Skeniranje..." },
-  en: { hub: "Freeride", live: "LIVE CAMS", snow: "Snow", total: "Total", rain: "Rain", scanning: "Scanning..." }
+  sr: { hub: "Freeride", live: "UŽIVO KAMERE", snow: "Prognoza snega", total: "Ukupno", rain: "Kiša", scanning: "Skeniranje..." },
+  en: { hub: "Freeride", live: "LIVE CAMS", snow: "Snow Forecast", total: "Total", rain: "Rain", scanning: "Scanning..." }
 };
 
 const WeatherVisual = ({ code }: { code?: number }) => {
@@ -65,61 +65,48 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-500">
-      <nav className="sticky top-0 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl z-50 px-6 py-4 border-b dark:border-white/5">
+      <nav className="sticky top-0 bg-white/70 dark:bg-[#020617]/70 backdrop-blur-xl z-50 px-6 py-4 shadow-sm ring-1 ring-black/5 dark:ring-white/5">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-black uppercase tracking-tighter">
             Balkan <span className="text-blue-600 italic">{t.hub}</span>
           </h1>
           
           <div className="flex items-center gap-6">
-            {/* Language Dropdown sa zastavicama */}
             <div className="relative">
-              <button 
-                onClick={() => setIsLangOpen(!isLangOpen)}
-                className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest hover:opacity-70 transition-all"
-              >
-                {lang === 'sr' ? '🇷🇸 SRB' : '🇺🇸 ENG'}
-                <ChevronDown className={`w-3 h-3 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
+              <button onClick={() => setIsLangOpen(!isLangOpen)} className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:opacity-70 transition-all">
+                {lang === 'sr' ? '🇷🇸 SRB' : '🇺🇸 ENG'} <ChevronDown className={`w-3 h-3 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
               </button>
-              
               {isLangOpen && (
-                <div className="absolute right-0 mt-3 w-32 bg-white dark:bg-[#0f172a] shadow-2xl border dark:border-white/10 overflow-hidden z-[60]">
-                  <button onClick={() => {setLang('sr'); setIsLangOpen(false)}} className="w-full px-4 py-3 text-left text-[10px] font-black hover:bg-slate-50 dark:hover:bg-white/5 flex items-center gap-2">
-                    🇷🇸 SRBIJA
-                  </button>
-                  <button onClick={() => {setLang('en'); setIsLangOpen(false)}} className="w-full px-4 py-3 text-left text-[10px] font-black hover:bg-slate-50 dark:hover:bg-white/5 flex items-center gap-2 border-t dark:border-white/5">
-                    🇺🇸 ENGLISH
-                  </button>
+                <div className="absolute right-0 mt-4 w-36 bg-white dark:bg-[#0f172a] shadow-2xl ring-1 ring-black/5 dark:ring-white/10 rounded-2xl overflow-hidden z-[60]">
+                  <button onClick={() => {setLang('sr'); setIsLangOpen(false)}} className="w-full px-5 py-3 text-left text-[10px] font-black hover:bg-slate-50 dark:hover:bg-white/5 flex items-center gap-2">🇷🇸 SRBIJA</button>
+                  <button onClick={() => {setLang('en'); setIsLangOpen(false)}} className="w-full px-5 py-3 text-left text-[10px] font-black hover:bg-slate-50 dark:hover:bg-white/5 flex items-center gap-2 border-t dark:border-white/5">🇺🇸 ENGLISH</button>
                 </div>
               )}
             </div>
-
-            {/* Dark Mode Toggle */}
             <ThemeToggle />
           </div>
         </div>
       </nav>
 
       <main className="max-w-7xl mx-auto px-6 py-10">
-        {/* Mapa - BEZ rounded corners */}
-        <div className="overflow-hidden mb-12 shadow-sm h-[500px] bg-white dark:bg-white/5 border dark:border-white/5">
+        {/* MAPA - SKLONJEN ROUNDED RADIUS */}
+        <div className="overflow-hidden mb-12 shadow-2xl shadow-blue-500/10 h-[500px] bg-white dark:bg-white/5 p-4 ring-1 ring-black/5 dark:ring-white/5">
           <BalkanMap resorts={resorts} timeframe={timeframe} />
         </div>
 
-        {/* Time Selector */}
-        <div className="flex flex-wrap justify-center gap-2 mb-16 p-1 bg-slate-200/50 dark:bg-white/5 w-fit mx-auto border dark:border-white/5 shadow-inner">
+        <div className="flex flex-wrap justify-center gap-2 mb-16 p-2 bg-white dark:bg-white/5 rounded-[2.2rem] w-fit mx-auto shadow-xl ring-1 ring-black/5 dark:ring-white/5">
           {timeOptions.map((opt) => (
             <button key={opt.value} onClick={() => setTimeframe(opt.value)}
-              className={`px-6 py-2.5 text-[10px] font-black uppercase transition-all ${timeframe === opt.value ? 'bg-white dark:bg-white/20 shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
+              className={`px-6 py-3 rounded-[1.8rem] text-[11px] font-black uppercase transition-all duration-300 ${timeframe === opt.value ? 'bg-blue-600 text-white shadow-lg scale-105' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'}`}>
               {opt.label}
             </button>
           ))}
         </div>
 
-        {/* Grid - BEZ rounded corners na karticama */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
+        {/* KONTEJNER KARTICA - SKLONJEN ROUNDED RADIUS (samo Grid) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {loading ? (
-            <div className="col-span-full text-center py-20 font-black uppercase opacity-20 animate-pulse text-2xl tracking-tighter italic">{t.scanning}</div>
+            <div className="col-span-full text-center py-20 font-black uppercase opacity-20 animate-pulse text-2xl tracking-widest italic">{t.scanning}</div>
           ) : (
             resorts.map((resort) => {
               let calcSnow = 0, totalP = 0, calcRain = 0;
@@ -136,39 +123,40 @@ export default function Home() {
               const s = getStatus(calcSnow);
 
               return (
-                <div key={resort.id} className="bg-white dark:bg-white/5 p-8 border dark:border-white/5 flex flex-col h-full hover:bg-slate-50 dark:hover:bg-white/[0.07] transition-all group">
+                /* KARTICE SU OSTALE ROUNDED (Apple Style) */
+                <div key={resort.id} className="bg-white dark:bg-white/5 p-8 rounded-[3.5rem] flex flex-col h-full shadow-xl shadow-slate-200/50 dark:shadow-none ring-1 ring-black/5 dark:ring-white/5 hover:translate-y-[-8px] transition-all duration-500 group">
                   <div className="mb-6">
-                    <div className={`inline-flex items-center gap-2 px-3 py-1 text-[9px] font-black uppercase mb-4 shadow-sm ${s.cls} text-white`}>
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase mb-5 shadow-sm ${s.cls} text-white`}>
                       {s.icon} {s.txt}
                     </div>
-                    <h3 className="text-3xl font-black uppercase tracking-tighter leading-none mb-1">{resort.name}</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{resort.country}</p>
+                    <h3 className="text-3xl font-black uppercase tracking-tighter leading-none mb-2 group-hover:text-blue-600 transition-colors">{resort.name}</h3>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">{resort.country}</p>
                   </div>
 
-                  <div className="h-40 bg-slate-950 dark:bg-blue-600 p-8 text-white relative overflow-hidden mb-8 flex flex-col justify-center">
-                    <p className="text-[10px] font-black uppercase opacity-40 mb-1 tracking-widest">{t.snow} (+{timeframe}h)</p>
-                    <p className="text-6xl font-black italic tracking-tighter">+{calcSnow.toFixed(1)} <span className="text-xl font-normal opacity-30 uppercase ml-1">cm</span></p>
-                    <div className="flex gap-4 mt-4 pt-4 border-t border-white/10 text-[11px] font-bold uppercase opacity-60">
-                      <span>{t.total}: {totalP.toFixed(1)}mm</span>
-                      {calcRain > 0 && <span className="text-red-400">!! Kiša: {calcRain.toFixed(1)}mm</span>}
+                  <div className="h-48 bg-blue-600 p-8 rounded-[3rem] text-white relative overflow-hidden shadow-2xl shadow-blue-600/40 mb-10 flex flex-col justify-center">
+                    <p className="text-[11px] font-black uppercase opacity-70 mb-2 tracking-widest">{t.snow} (+{timeframe}h)</p>
+                    <p className="text-7xl font-black italic tracking-tighter">+{calcSnow.toFixed(1)} <span className="text-2xl font-normal opacity-50 uppercase ml-1 tracking-normal">cm</span></p>
+                    <div className="flex gap-6 mt-6 pt-5 border-t border-white/20 text-[12px] font-black uppercase">
+                      <div className="flex items-center gap-2"><Droplets className="w-4 h-4 text-blue-200" /> {t.total}: {totalP.toFixed(1)}mm</div>
+                      {calcRain > 0 && <div className="text-red-300 font-black underline underline-offset-4 decoration-2 italic">!! {t.rain}: {calcRain.toFixed(1)}mm</div>}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-1 mb-8">
-                    <div className="bg-slate-50 dark:bg-white/5 h-24 flex items-center justify-center border dark:border-white/5">
+                  <div className="grid grid-cols-3 gap-4 mb-10 text-center font-bold">
+                    <div className="bg-slate-50 dark:bg-white/5 rounded-[2.2rem] h-28 flex items-center justify-center shadow-inner">
                       <WeatherVisual code={resort.current?.weatherCode} />
                     </div>
-                    <div className="bg-slate-50 dark:bg-white/5 h-24 flex flex-col items-center justify-center border dark:border-white/5">
-                      <Thermometer className="w-4 h-4 mb-1 text-slate-300" />
-                      <span className="text-xl font-black">{resort.current?.temp ?? '--'}°</span>
+                    <div className="bg-slate-50 dark:bg-white/5 rounded-[2.2rem] h-28 flex flex-col items-center justify-center border dark:border-white/5">
+                      <Thermometer className="w-5 h-5 mb-2 text-slate-300" />
+                      <span className="text-2xl font-black">{resort.current?.temp ?? '--'}°</span>
                     </div>
-                    <div className="bg-slate-50 dark:bg-white/5 h-24 flex flex-col items-center justify-center border dark:border-white/5">
-                      <Navigation2 className="w-4 h-4 mb-1 text-blue-600 fill-blue-600" style={{ transform: `rotate(${resort.current?.windDir ?? 0}deg)` }} />
-                      <span className="text-lg font-black tracking-tighter">{resort.current?.windSpeed ?? '--'}</span>
+                    <div className="bg-slate-50 dark:bg-white/5 rounded-[2.2rem] h-28 flex flex-col items-center justify-center border dark:border-white/5">
+                      <Navigation2 className="w-5 h-5 mb-2 text-blue-600 fill-blue-600" style={{ transform: `rotate(${resort.current?.windDir ?? 0}deg)`, transition: '2s' }} />
+                      <span className="text-xl font-black tracking-tighter">{resort.current?.windSpeed ?? '--'}</span>
                     </div>
                   </div>
 
-                  <button onClick={() => setSelectedResort(resort)} className="mt-auto w-full py-5 bg-black dark:bg-white text-white dark:text-black font-black uppercase text-[10px] tracking-[0.4em] hover:bg-blue-600 dark:hover:bg-blue-600 dark:hover:text-white transition-all active:scale-[0.98]">
+                  <button onClick={() => setSelectedResort(resort)} className="mt-auto w-full py-7 bg-slate-900 dark:bg-white text-white dark:text-black font-black uppercase text-[12px] tracking-[0.3em] rounded-[2rem] hover:bg-blue-600 dark:hover:bg-blue-600 dark:hover:text-white transition-all shadow-xl active:scale-95 italic">
                     {t.live}
                   </button>
                 </div>
