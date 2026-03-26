@@ -5,7 +5,6 @@ import { Snowflake, ArrowLeft } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import Link from 'next/link';
 
-// SVGOVI MORAJU BITI TU ZA JEZIK
 const FlagUSA = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 64 64"><path fill="#ed4c5c" d="M48 6.6C43.3 3.7 37.9 2 32 2v4.6z"/><path fill="#fff" d="M32 11.2h21.6C51.9 9.5 50 7.9 48 6.6H32z"/><path fill="#428bc1" d="M16 6.6c-2.1 1.3-4 2.9-5.7 4.6c-1.4 1.4-2.6 3-3.6 4.6c-.9 1.5-1.8 3-2.4 4.6c-.6 1.5-1.1 3-1.5 4.6c-.4 1.5-.6 3-.7 4.6c-.1.8-.1 1.6-.1 2.4h30V2c-5.9 0-11.3 1.7-16 4.6"/></svg>;
 const FlagSRB = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 64 64"><path fill="#ed4c5c" d="M32 2C18.9 2 7.8 10.4 3.7 22h56.6C56.2 10.4 45.1 2 32 2"/><path fill="#f9f9f9" d="M32 62c13.1 0 24.2-8.3 28.3-20H3.7C7.8 53.7 18.9 62 32 62"/><path fill="#2872a0" d="M3.7 22C2.6 25.1 2 28.5 2 32s.6 6.9 1.7 10h56.6c1.1-3.1 1.7-6.5 1.7-10s-.6-6.9-1.7-10z"/></svg>;
 
@@ -13,11 +12,16 @@ export default function ResortPage({ params }: { params: Promise<{ id: string }>
   const resolvedParams = use(params);
   const [lang, setLang] = useState('sr');
   
-  // ČISTIMO SVE ŠTO NIJE BROJ - ako dobije "id:123" pretvoriće u "123"
+  // URL može doći kao "id:123" ili "id%3A123" ili samo "123"
   const rawId = decodeURIComponent(resolvedParams.id);
-  const cleanId = rawId.replace(/\D/g, "");
   
-  const resort = balkanResorts.find(r => r.id.toString() === cleanId);
+  // Tražimo resort tako da proveravamo da li string ID-ja iz baze 
+  // sadrži ovaj ID iz URL-a ili obrnuto. Najsigurnije za tvoj format:
+  const resort = balkanResorts.find(r => {
+    const dbId = r.id.toString().toLowerCase();
+    const urlId = rawId.toLowerCase();
+    return dbId === urlId || dbId === `id:${urlId}` || urlId === `id:${dbId}`;
+  });
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#020617] font-sans">
@@ -40,7 +44,7 @@ export default function ResortPage({ params }: { params: Promise<{ id: string }>
         {!resort ? (
            <div className="bg-white dark:bg-white/5 p-20 rounded-[4rem] border border-black/5 text-center">
               <h2 className="text-3xl font-black uppercase mb-4 opacity-20 italic">Mountain Not Found</h2>
-              <p className="text-sm font-bold opacity-40 mb-8 tracking-widest uppercase">ID debug: {cleanId} (raw: {rawId})</p>
+              <p className="text-[10px] font-mono opacity-40 mb-8 uppercase">Debug: Searched for "{rawId}"</p>
               <Link href="/" className="bg-[#A855F7] text-white px-10 py-4 rounded-full font-black uppercase tracking-widest shadow-xl">Back Home</Link>
            </div>
         ) : (
@@ -50,7 +54,6 @@ export default function ResortPage({ params }: { params: Promise<{ id: string }>
                 <h1 className="text-8xl font-black italic uppercase tracking-tighter mb-4 leading-none">{resort.name}</h1>
                 <div className="h-2 w-40 bg-[#A855F7] rounded-full mt-10" />
              </div>
-             {/* Ovde idu detalji vremenske prognoze koje smo pre imali */}
           </div>
         )}
       </main>
