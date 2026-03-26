@@ -1,58 +1,28 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --background: #f8fafc;
-  --foreground: #020617;
-  --card-bg: #ffffff;
-  --card-border: rgba(0, 0, 0, 0.05);
-  --card-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
-  --card-shadow-hover: 0 30px 60px -15px rgba(0,0,0,0.1);
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+  }
+  .dark {
+    --background: 222 47% 1%;
+    --foreground: 210 40% 98%;
+  }
 }
 
-.dark {
-  --background: #020617;
-  --foreground: #f1f5f9;
-  --card-bg: rgba(255, 255, 255, 0.03);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --card-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
-  --card-shadow-hover: 0 40px 80px -15px rgba(0,0,0,0.8);
+@layer utilities {
+  .resort-card {
+    @apply rounded-3xl border border-black/5 bg-white p-5 shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-white/10 dark:bg-white/5;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  transition: background-color 0.4s ease, color 0.4s ease;
-  -webkit-font-smoothing: antialiased;
-}
-
-.resort-card {
-  background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--card-shadow);
-  transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
-}
-
-.resort-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--card-shadow-hover);
-  border-color: rgba(59, 130, 246, 0.4);
-}
-
-.slider-container {
-  background-color: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 9999px;
-}
-
-.dark .slider-container {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+  @apply bg-[rgb(var(--background))] text-[rgb(var(--foreground))] antialiased;
+  margin: 0;
+  padding: 0;
 }
