@@ -7,10 +7,11 @@ const geoUrl = "https://raw.githubusercontent.com/leakyMirror/map-of-europe/mast
 export default function BalkanMap({ resorts = [], timeframe }: { resorts: any[], timeframe: number }) {
   const [hovered, setHovered] = useState<any>(null);
 
-  const getMapMarkerColor = (snow: number) => {
-    if (snow >= 100) return '#ef4444'; // Crvena - Japan Style
-    if (snow >= 50)  return '#9333ea'; // Ljubičasta
-    if (snow >= 20)  return '#4f46e5'; // Indigo
+  const getSnowColor = (snow: number) => {
+    if (snow >= 100) return '#ef4444'; // Japan Style
+    if (snow >= 50)  return '#9333ea'; // Deep
+    if (snow >= 20)  return '#4f46e5'; // Powder
+    if (snow >= 10)  return '#22c55e'; // Rideable
     return '#94a3b8';
   }
 
@@ -47,48 +48,45 @@ export default function BalkanMap({ resorts = [], timeframe }: { resorts: any[],
           }
 
           const isJahorina = r.name.toLowerCase().includes('jahorina');
+          const color = getSnowColor(calcSnow);
 
           return (
-            <Marker 
-              key={r.id} 
-              coordinates={[r.lon, r.lat]}
-              onMouseEnter={(e) => {
-                // Uzimamo koordinate miša da bi tooltip bio tačno iznad tačke
-                setHovered({ ...r, calcSnow });
-              }}
-              onMouseLeave={() => setHovered(null)}
-              className="cursor-pointer outline-none"
-            >
-              <circle r={6} fill={getMapMarkerColor(calcSnow)} stroke="#fff" strokeWidth={2} className="transition-all duration-300 hover:scale-[1.8] hover:stroke-blue-400" />
-              <text 
-                textAnchor="middle" 
-                y={isJahorina ? -18 : 22} 
-                className="font-black uppercase fill-slate-800 dark:fill-slate-200 pointer-events-none tracking-tighter select-none" 
-                style={{ fontSize: "10px", filter: "drop-shadow(0px 1px 1px rgba(255,255,255,0.5))" }}
+            <React.Fragment key={r.id}>
+              <Marker 
+                coordinates={[r.lon, r.lat]}
+                onMouseEnter={() => setHovered({ ...r, calcSnow, color })}
+                onMouseLeave={() => setHovered(null)}
+                className="cursor-pointer outline-none group"
               >
-                {r.name}
-              </text>
-            </Marker>
+                <circle r={6} fill={color} stroke="#fff" strokeWidth={2} className="transition-all duration-300 group-hover:scale-[1.8]" />
+                <text textAnchor="middle" y={isJahorina ? -18 : 22} className="font-black uppercase fill-slate-800 dark:fill-slate-200 pointer-events-none tracking-tighter text-[10px]">
+                  {r.name}
+                </text>
+              </Marker>
+
+              {/* TOOLTIP IZNAD MARKERA */}
+              {hovered?.id === r.id && (
+                <Marker coordinates={[r.lon, r.lat]}>
+                  <g transform="translate(-100, -140)">
+                    <foreignObject width="200" height="120">
+                      <div className="animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+                        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-black/5 dark:border-white/10 p-4 shadow-2xl rounded-[1.5rem] flex flex-col items-center">
+                          <div className="w-10 h-1 rounded-full mb-3" style={{ backgroundColor: hovered.color }} />
+                          <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase mb-1">{hovered.country}</span>
+                          <span className="text-lg font-black tracking-tighter uppercase leading-none mb-3">{hovered.name}</span>
+                          <div className="bg-black/5 dark:bg-white/5 px-4 py-2 rounded-xl w-full text-center">
+                             <span className="text-sm font-black" style={{ color: hovered.color }}>+{hovered.calcSnow.toFixed(1)} cm</span>
+                          </div>
+                        </div>
+                      </div>
+                    </foreignObject>
+                  </g>
+                </Marker>
+              )}
+            </React.Fragment>
           )
         })}
       </ComposableMap>
-
-      {/* NOVI APPLE TOOLTIP (Sada je fiksiran u odnosu na kontejner ali centriran) */}
-      {hovered && (
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-50">
-           <div className="animate-in fade-in zoom-in-90 slide-in-from-bottom-4 duration-300 ease-out">
-            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-black/5 dark:border-white/10 p-4 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.25)] flex flex-col items-center min-w-[140px]">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mb-2 animate-pulse" />
-                <span className="text-[9px] font-black text-slate-400 tracking-[0.2em] uppercase mb-1">{hovered.country}</span>
-                <span className="text-xl font-black tracking-tighter uppercase leading-none">{hovered.name}</span>
-                <div className="mt-3 flex items-center gap-2 border-t border-black/5 dark:border-white/5 pt-2 w-full justify-center">
-                    <span className="text-[10px] font-bold opacity-40 uppercase">Forecast</span>
-                    <span className="text-sm font-black text-blue-600">+{hovered.calcSnow.toFixed(1)} cm</span>
-                </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
