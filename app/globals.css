@@ -2,23 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #f8fafc;
-  --foreground: #020617;
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 transition-colors duration-300;
+  }
+  .dark body {
+    @apply bg-[#020617] text-slate-100;
+  }
 }
 
-/* Prisilni override za dark mode ako Tailwind ne hvata */
-.dark {
-  --background: #020617;
-  --foreground: #f8fafc;
-  background-color: #020617;
-  color: #f8fafc;
+/* Custom shadow za tvoj standout efekat */
+.card-shadow {
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  transition: background-color 0.3s ease;
+.dark .card-shadow {
+  box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
 }
 
 .no-scrollbar::-webkit-scrollbar {
