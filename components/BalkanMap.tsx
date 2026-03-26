@@ -3,27 +3,27 @@ import React from 'react';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "react-simple-maps";
 import { useRouter } from 'next/navigation';
 
-export default function BalkanMap({ resorts, timeframe, getStatus, isDark }: any) {
+export default function BalkanMap({ resorts, timeframe, getStatus }: any) {
   const router = useRouter();
 
   return (
-    <div className="w-full h-full bg-[#f1f5f9] dark:bg-[#020617] transition-colors">
+    <div className="w-full h-full bg-[#f8fafc] dark:bg-[#020617] overflow-hidden">
       <ComposableMap
         projection="geoAzimuthalEqualArea"
-        // Centrirano između Jahorine i Mavrova (cca 20E, 42.5N)
-        projectionConfig={{ rotate: [-20.0, -42.5, 0], scale: 6000 }} 
+        // Optimizovano da hvata Jahorinu do Mavrova u fokusu
+        projectionConfig={{ rotate: [-19.5, -42.6, 0], scale: 7500 }}
       >
-        <ZoomableGroup center={[20.0, 42.5]} zoom={1} minZoom={1} maxZoom={1}>
+        <ZoomableGroup center={[19.5, 42.6]} zoom={1} minZoom={1} maxZoom={1}>
           <Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
             {({ geographies }) =>
               geographies.map((geo) => (
                 <Geography 
                   key={geo.rsmKey} 
                   geography={geo} 
-                  // Smanjen kontrast - nežnije boje
-                  fill={isDark ? "#0f172a" : "#e2e8f0"} 
-                  stroke={isDark ? "#1e293b" : "#cbd5e1"} 
-                  className="outline-none" 
+                  fill="currentColor" 
+                  className="text-slate-200 dark:text-slate-800/50 outline-none transition-colors"
+                  stroke="currentColor"
+                  strokeWidth={0.5}
                 />
               ))
             }
@@ -38,17 +38,25 @@ export default function BalkanMap({ resorts, timeframe, getStatus, isDark }: any
 
             return (
               <Marker key={resort.id} coordinates={[resort.lon, resort.lat]}>
-                <g onClick={() => router.push(`/resort/${resort.id}`)} className="cursor-pointer outline-none group">
-                  <circle r="6" fill={s.color} stroke="white" strokeWidth="2" className="transition-all group-hover:r-8" />
+                <g 
+                  onClick={() => router.push(`/resort/${resort.id}`)} 
+                  className="cursor-pointer outline-none group"
+                >
+                  {/* Animirani Marker */}
+                  <circle r="6" fill={s.color} className="animate-pulse opacity-40" />
+                  <circle r="4" fill={s.color} stroke="white" strokeWidth="2" className="transition-transform group-hover:scale-150" />
                   
-                  {/* Tooltipi - imena planina su uvek vidljiva ali diskretna */}
-                  <text 
-                    textAnchor="middle" 
-                    y="-15" 
-                    className="fill-black dark:fill-white text-[10px] font-black uppercase tracking-tighter opacity-60 group-hover:opacity-100 transition-opacity"
-                  >
-                    {resort.name}
-                  </text>
+                  {/* Tooltip na hover */}
+                  <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <rect x="-30" y="-35" width="60" height="20" rx="10" fill="black" />
+                    <text 
+                      textAnchor="middle" 
+                      y="-21" 
+                      className="fill-white text-[9px] font-black uppercase tracking-tighter"
+                    >
+                      {resort.name}
+                    </text>
+                  </g>
                 </g>
               </Marker>
             );
