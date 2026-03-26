@@ -56,3 +56,13 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Popravka za SVG zastave da ne budu isečene */
+svg {
+  overflow: visible !important;
+}
+
+/* Hover bridge za mapu - omogućava da miš pređe sa markera na tooltip bez gubitka hovera */
+.group:hover foreignObject {
+  pointer-events: auto;
+}
