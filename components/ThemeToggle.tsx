@@ -15,12 +15,16 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      className="relative w-14 h-7 flex items-center bg-slate-200 dark:bg-white/10 rounded-full p-1 transition-all duration-300 shadow-inner cursor-pointer"
+      className="relative w-14 h-7 flex items-center bg-slate-200 dark:bg-white/10 rounded-full p-1 transition-all duration-300 shadow-inner cursor-pointer border border-black/5 dark:border-white/5"
     >
       <div 
-        className={`absolute w-5 h-5 bg-white dark:bg-blue-500 rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center ${isDark ? 'translate-x-7' : 'translate-x-0'}`}
+        className={`absolute w-5 h-5 bg-white dark:bg-blue-600 rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center ${isDark ? 'translate-x-7' : 'translate-x-0'}`}
       >
-        {isDark ? <Moon className="w-3 h-3 text-white" /> : <Sun className="w-3 h-3 text-amber-500" />}
+        {isDark ? (
+          <Moon className="w-3 h-3 text-white fill-white" />
+        ) : (
+          <Sun className="w-3 h-3 text-amber-500 fill-amber-500" />
+        )}
       </div>
     </button>
   )

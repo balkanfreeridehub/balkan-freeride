@@ -1,8 +1,6 @@
-@import "tailwindcss";
-
-@theme {
-  --color-brand: #3b82f6;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #f8fafc;
@@ -10,25 +8,25 @@
   --card-bg: #ffffff;
   --card-border: rgba(0, 0, 0, 0.05);
   --card-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
-  --card-shadow-hover: 0 30px 60px -15px rgba(0,0,0,0.15);
+  --card-shadow-hover: 0 30px 60px -15px rgba(0,0,0,0.1);
 }
 
 .dark {
   --background: #020617;
-  --foreground: #f8fafc;
+  --foreground: #f1f5f9;
   --card-bg: rgba(255, 255, 255, 0.03);
   --card-border: rgba(255, 255, 255, 0.08);
-  --card-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
-  --card-shadow-hover: 0 30px 60px -15px rgba(0,0,0,0.7);
+  --card-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+  --card-shadow-hover: 0 40px 80px -15px rgba(0,0,0,0.8);
 }
 
-@layer base {
-  body {
-    background-color: var(--background);
-    color: var(--foreground);
-    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s ease;
-    @apply antialiased;
-  }
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .resort-card {
@@ -39,9 +37,21 @@
 }
 
 .resort-card:hover {
-  transform: translateY(-12px) scale(1.02);
+  transform: translateY(-8px);
   box-shadow: var(--card-shadow-hover);
-  border-color: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.slider-container {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+}
+
+.dark .slider-container {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .no-scrollbar::-webkit-scrollbar {

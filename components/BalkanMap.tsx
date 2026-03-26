@@ -18,22 +18,21 @@ export default function BalkanMap({ resorts, timeframe, getStatus }: any) {
     <div className="w-full h-full bg-transparent overflow-visible">
       <ComposableMap
         projection="geoAzimuthalEqualArea"
-        // FOKUS NA KOLAŠIN: hvata sve od BiH do MK
-        projectionConfig={{ rotate: [-19.5, -42.8, 0], scale: 8000 }}
+        projectionConfig={{ rotate: [-19.5, -43.0, 0], scale: 6500 }}
       >
-        <ZoomableGroup center={[19.5, 42.8]} zoom={1} minZoom={1} maxZoom={1}>
+        <ZoomableGroup center={[19.5, 43.0]} zoom={1} minZoom={1} maxZoom={1} disablePanning disableZooming>
           <Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
-            {({ geographies }) =>
-              geographies.map((geo) => (
+            {({ geographies }: { geographies: any[] }) =>
+              geographies.map((geo: any) => (
                 <Geography 
                   key={geo.rsmKey} 
                   geography={geo} 
                   fill={isDark ? "#0f172a" : "#f1f5f9"} 
-                  stroke={isDark ? "#334155" : "#cbd5e1"}
+                  stroke={isDark ? "#1e293b" : "#cbd5e1"}
                   strokeWidth={0.8}
                   style={{
                     default: { outline: "none" },
-                    hover: { fill: isDark ? "#1e293b" : "#e2e8f0", outline: "none" },
+                    hover: { fill: isDark ? "#0f172a" : "#f1f5f9", outline: "none" },
                     pressed: { outline: "none" }
                   }}
                 />
@@ -47,33 +46,26 @@ export default function BalkanMap({ resorts, timeframe, getStatus }: any) {
               if (p > 0 && resort.hourly.temperature_2m[i] <= 1) snow += p * 1.5;
             });
             const s = getStatus(snow);
+            const isTopLabel = resort.name === 'Jahorina' || resort.name === 'Bjelašnica';
 
             return (
               <Marker key={resort.id} coordinates={[resort.lon, resort.lat]}>
-                <g className="cursor-pointer outline-none group">
-                  {/* Animacija pulsa */}
-                  <circle r="10" fill={s.color} className="animate-ping opacity-20" />
-                  <circle r="6" fill={s.color} stroke="white" strokeWidth={2} onClick={() => router.push(`/resort/${resort.id}`)} className="transition-transform group-hover:scale-125" />
+                <g className="cursor-pointer outline-none group" onClick={() => router.push(`/resort/${resort.id}`)}>
+                  <circle r="12" fill={s.color} className="animate-ping opacity-20" />
+                  <circle r="6" fill={s.color} stroke="white" strokeWidth={2} className="transition-transform group-hover:scale-125" />
                   
-                  {/* Ime planine (uvek vidljivo, diskretno) */}
-                  <text textAnchor="middle" y="20" className="fill-slate-400 dark:fill-slate-500 text-[9px] font-black uppercase pointer-events-none tracking-tighter">
+                  <text 
+                    textAnchor="middle" 
+                    y={isTopLabel ? -15 : 22} 
+                    className="fill-slate-500 dark:fill-slate-400 text-[10px] font-black uppercase pointer-events-none tracking-tighter"
+                  >
                     {resort.name}
                   </text>
 
-                  {/* FENSI TOOLTIP (Hover) */}
-                  <g 
-                    className="opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 pointer-events-auto"
-                    onClick={() => router.push(`/resort/${resort.id}`)}
-                  >
-                    <rect x="-45" y="-60" width="90" height="40" rx="15" fill={s.color} className="shadow-2xl" />
-                    <text textAnchor="middle" y="-45" className="fill-white text-[10px] font-black uppercase tracking-tighter">
-                      {resort.name}
-                    </text>
-                    <text textAnchor="middle" y="-28" className="fill-white text-[14px] font-black">
-                      {snow.toFixed(0)}cm
-                    </text>
-                    {/* Strelica tooltripa */}
-                    <path d="M-6 -20 L0 -12 L6 -20 Z" fill={s.color} />
+                  <g className="opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                    <rect x="-40" y="-55" width="80" height="35" rx="12" fill="#020617" />
+                    <text textAnchor="middle" y="-42" className="fill-white text-[9px] font-black uppercase tracking-widest">{snow.toFixed(0)}cm</text>
+                    <text textAnchor="middle" y="-30" className="fill-blue-400 text-[7px] font-black uppercase tracking-widest">View Details</text>
                   </g>
                 </g>
               </Marker>
