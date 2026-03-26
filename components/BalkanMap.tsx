@@ -4,7 +4,7 @@ import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps
 
 const geoUrl = "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/TopoJSON/europe.topojson"
 
-export default function BalkanMap({ resorts = [], timeframe, onSelect }: { resorts: any[], timeframe: number, onSelect: (resort: any) => void }) {
+export default function BalkanMap({ resorts = [], timeframe, onSelect, getStatus }: { resorts: any[], timeframe: number, onSelect: (resort: any) => void, getStatus: any }) {
   const [hovered, setHovered] = useState<any>(null);
 
   return (
@@ -23,22 +23,25 @@ export default function BalkanMap({ resorts = [], timeframe, onSelect }: { resor
               if (r.hourly.precipitation[i] > 0 && r.hourly.temperature_2m[i] <= 1) calcSnow += r.hourly.precipitation[i] * 1.2;
             }
           }
+          const status = getStatus(calcSnow);
 
           return (
             <React.Fragment key={r.id}>
-              <Marker coordinates={[r.lon, r.lat]} onMouseEnter={() => setHovered({ ...r, calcSnow })} onMouseLeave={() => setHovered(null)} onClick={() => onSelect(r)} className="cursor-pointer">
-                <circle r={8} fill={calcSnow > 20 ? "#4f46e5" : "#94a3b8"} stroke="#fff" strokeWidth={2} />
+              <Marker coordinates={[r.lon, r.lat]} onMouseEnter={() => setHovered({ ...r, calcSnow, status })} onMouseLeave={() => setHovered(null)} onClick={() => onSelect(r)} className="cursor-pointer outline-none">
+                <circle r={8} fill={status.color} stroke="#fff" strokeWidth={2} className="transition-transform duration-300 hover:scale-125" />
+                <text textAnchor="middle" y={20} className="text-[8px] font-black uppercase fill-slate-400 pointer-events-none">{r.name}</text>
               </Marker>
 
               {hovered?.id === r.id && (
                 <Marker coordinates={[r.lon, r.lat]}>
-                  <g transform="translate(-80, -105)">
-                    {/* MOST: Nevidljiva zona koja spaja tacku i tooltip */}
-                    <rect width="160" height="110" fill="transparent" onMouseEnter={() => setHovered(hovered)} onMouseLeave={() => setHovered(null)} />
-                    <foreignObject width="160" height="90" className="pointer-events-none">
-                      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-3 shadow-xl rounded-2xl flex flex-col items-center pointer-events-auto cursor-pointer border border-black/5" onClick={() => onSelect(r)}>
+                  <g transform="translate(-80, -110)">
+                    {/* MOST - Spaja tacku i tooltip */}
+                    <rect width="160" height="120" fill="transparent" onMouseEnter={() => setHovered(hovered)} onMouseLeave={() => setHovered(null)} />
+                    <foreignObject width="160" height="100" className="pointer-events-none">
+                      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 shadow-2xl rounded-[2rem] flex flex-col items-center pointer-events-auto cursor-pointer border border-black/5 transition-all" onClick={() => onSelect(r)}>
+                        <div className="w-8 h-1 rounded-full mb-2" style={{ backgroundColor: hovered.status.color }} />
                         <span className="text-[10px] font-black uppercase tracking-tighter">{hovered.name}</span>
-                        <span className="text-sm font-black text-blue-600 mt-1">+{hovered.calcSnow.toFixed(1)}cm</span>
+                        <span className="text-lg font-black mt-1" style={{ color: hovered.status.color }}>+{hovered.calcSnow.toFixed(1)}cm</span>
                       </div>
                     </foreignObject>
                   </g>
