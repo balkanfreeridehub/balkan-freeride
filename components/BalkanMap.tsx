@@ -8,11 +8,25 @@ export default function BalkanMap({ resorts = [], timeframe, onSelect, getStatus
   const [hovered, setHovered] = useState<any>(null);
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
-      <ComposableMap projection="geoAzimuthalEqualArea" projectionConfig={{ rotate: [-18.6, -43.4, 0], scale: 13500 }} style={{ width: "100%", height: "100%" }}>
+    <div className="relative w-full h-full flex items-center justify-center bg-slate-200 dark:bg-[#050b1a]">
+      <ComposableMap 
+        projection="geoAzimuthalEqualArea" 
+        // Centrirano na Balkan (Kolašin region) da se vide i MK planine
+        projectionConfig={{ rotate: [-19.5, -42.5, 0], scale: 14000 }} 
+        style={{ width: "100%", height: "100%" }}
+      >
         <Geographies geography={geoUrl}>
           {({ geographies }) => geographies.map((geo) => (
-            <Geography key={geo.rsmKey} geography={geo} fill="currentColor" className="text-white dark:text-[#0b1224]" stroke="#cbd5e1" strokeWidth={0.2} style={{ default: { outline: "none" } }} />
+            <Geography 
+              key={geo.rsmKey} 
+              geography={geo} 
+              fill="currentColor" 
+              // Jači kontrast pozadine
+              className="text-white dark:text-[#0f172a]" 
+              stroke="#64748b" 
+              strokeWidth={0.5} 
+              style={{ default: { outline: "none" } }} 
+            />
           ))}
         </Geographies>
         
@@ -27,21 +41,36 @@ export default function BalkanMap({ resorts = [], timeframe, onSelect, getStatus
 
           return (
             <React.Fragment key={r.id}>
-              <Marker coordinates={[r.lon, r.lat]} onMouseEnter={() => setHovered({ ...r, calcSnow, status })} onMouseLeave={() => setHovered(null)} onClick={() => onSelect(r)} className="cursor-pointer outline-none group">
-                <circle r={8} fill={status.color} stroke="#fff" strokeWidth={2} className="transition-all duration-300 group-hover:scale-150 group-hover:stroke-[3px]" />
-                <text textAnchor="middle" y={22} className="text-[9px] font-black uppercase fill-slate-500 dark:fill-slate-400 pointer-events-none tracking-tighter shadow-sm">{r.name}</text>
+              <Marker 
+                coordinates={[r.lon, r.lat]} 
+                onMouseEnter={() => setHovered({ ...r, calcSnow, status })} 
+                onMouseLeave={() => setHovered(null)} 
+                onClick={() => onSelect(r)} 
+                className="cursor-pointer outline-none group"
+              >
+                <circle r={9} fill={status.color} stroke="#fff" strokeWidth={2.5} className="transition-all duration-300 group-hover:scale-150" />
+                {/* Ime planine - fiksno, bez promene boje na hover */}
+                <text textAnchor="middle" y={24} className="text-[10px] font-black uppercase fill-slate-600 dark:fill-slate-400 pointer-events-none tracking-tighter">
+                  {r.name}
+                </text>
               </Marker>
 
               {hovered?.id === r.id && (
                 <Marker coordinates={[r.lon, r.lat]}>
-                  <g transform="translate(-80, -125)">
-                    {/* MOST: Veća nevidljiva zona sa pointer-events-auto */}
-                    <rect width="160" height="130" fill="transparent" className="pointer-events-auto" onMouseEnter={() => setHovered(hovered)} onMouseLeave={() => setHovered(null)} />
-                    <foreignObject width="160" height="110" className="pointer-events-none">
-                      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 shadow-[0_20px_50px_rgba(0,0,0,0.2)] rounded-[2.5rem] flex flex-col items-center pointer-events-auto cursor-pointer border border-black/5 scale-100 animate-in fade-in zoom-in duration-200" onClick={() => onSelect(r)}>
-                        <div className="w-10 h-1.5 rounded-full mb-3" style={{ backgroundColor: hovered.status.color }} />
-                        <span className="text-[11px] font-black uppercase tracking-tighter text-slate-500">{hovered.name}</span>
-                        <span className="text-2xl font-black mt-1" style={{ color: hovered.status.color }}>+{hovered.calcSnow.toFixed(1)}cm</span>
+                  <g transform="translate(-80, -135)">
+                    {/* Nevidljivi most koji omogućava prelazak miša na tooltip */}
+                    <rect width="160" height="140" fill="transparent" className="pointer-events-auto" onMouseEnter={() => setHovered(hovered)} onMouseLeave={() => setHovered(null)} />
+                    <foreignObject width="160" height="120" style={{ overflow: 'visible' }}>
+                      <div 
+                        className="bg-white dark:bg-slate-900 p-5 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.3)] rounded-[2.5rem] flex flex-col items-center pointer-events-auto cursor-pointer border-2 border-slate-100 dark:border-white/5 animate-in fade-in zoom-in duration-150" 
+                        onClick={() => onSelect(r)}
+                      >
+                        <div className="w-12 h-1.5 rounded-full mb-3" style={{ backgroundColor: hovered.status.color }} />
+                        <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">{hovered.name}</span>
+                        <span className="text-3xl font-black mt-1 tabular-nums" style={{ color: hovered.status.color }}>
+                          +{hovered.calcSnow.toFixed(1)}
+                        </span>
+                        <span className="text-[8px] font-bold uppercase opacity-50">Click for details</span>
                       </div>
                     </foreignObject>
                   </g>
