@@ -4,6 +4,8 @@ import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "re
 import { useRouter } from 'next/navigation';
 import { useTheme } from "next-themes";
 
+const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+
 export default function BalkanMap({ resorts, timeframe, getStatus }: any) {
   const router = useRouter();
   const { theme } = useTheme();
@@ -18,10 +20,13 @@ export default function BalkanMap({ resorts, timeframe, getStatus }: any) {
     <div className="w-full h-full bg-transparent overflow-visible">
       <ComposableMap
         projection="geoAzimuthalEqualArea"
-        projectionConfig={{ rotate: [-19.5, -43.0, 0], scale: 6500 }}
+        projectionConfig={{ 
+          rotate: [-19.0, -42.5, 0], // Centrirano bliže Kolašinu
+          scale: 6000 
+        }}
       >
-        <ZoomableGroup center={[19.5, 43.0]} zoom={1} minZoom={1} maxZoom={1} disablePanning disableZooming>
-          <Geographies geography="https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json">
+        <ZoomableGroup center={[19.0, 42.5]} zoom={1} minZoom={1} maxZoom={1} disablePanning disableZooming>
+          <Geographies geography={geoUrl}>
             {({ geographies }: { geographies: any[] }) =>
               geographies.map((geo: any) => (
                 <Geography 
@@ -29,7 +34,7 @@ export default function BalkanMap({ resorts, timeframe, getStatus }: any) {
                   geography={geo} 
                   fill={isDark ? "#0f172a" : "#f1f5f9"} 
                   stroke={isDark ? "#1e293b" : "#cbd5e1"}
-                  strokeWidth={0.8}
+                  strokeWidth={0.5}
                   style={{
                     default: { outline: "none" },
                     hover: { fill: isDark ? "#0f172a" : "#f1f5f9", outline: "none" },
@@ -46,26 +51,27 @@ export default function BalkanMap({ resorts, timeframe, getStatus }: any) {
               if (p > 0 && resort.hourly.temperature_2m[i] <= 1) snow += p * 1.5;
             });
             const s = getStatus(snow);
-            const isTopLabel = resort.name === 'Jahorina' || resort.name === 'Bjelašnica';
+            // Jahorina i Bjelašnica su blizu, Jahorinu dižemo gore
+            const isJahorina = resort.name === 'Jahorina';
 
             return (
               <Marker key={resort.id} coordinates={[resort.lon, resort.lat]}>
                 <g className="cursor-pointer outline-none group" onClick={() => router.push(`/resort/${resort.id}`)}>
-                  <circle r="12" fill={s.color} className="animate-ping opacity-20" />
-                  <circle r="6" fill={s.color} stroke="white" strokeWidth={2} className="transition-transform group-hover:scale-125" />
+                  <circle r="10" fill={s.color} className="animate-ping opacity-20" />
+                  <circle r="5" fill={s.color} stroke="white" strokeWidth={2} />
                   
                   <text 
                     textAnchor="middle" 
-                    y={isTopLabel ? -15 : 22} 
-                    className="fill-slate-500 dark:fill-slate-400 text-[10px] font-black uppercase pointer-events-none tracking-tighter"
+                    y={isJahorina ? -12 : 18} 
+                    className="fill-slate-500 dark:fill-slate-400 text-[9px] font-bold uppercase pointer-events-none tracking-tighter"
                   >
                     {resort.name}
                   </text>
 
-                  <g className="opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                    <rect x="-40" y="-55" width="80" height="35" rx="12" fill="#020617" />
-                    <text textAnchor="middle" y="-42" className="fill-white text-[9px] font-black uppercase tracking-widest">{snow.toFixed(0)}cm</text>
-                    <text textAnchor="middle" y="-30" className="fill-blue-400 text-[7px] font-black uppercase tracking-widest">View Details</text>
+                  {/* Info Box na Hover */}
+                  <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <rect x="-30" y="-45" width="60" height="25" rx="8" fill="#020617" />
+                    <text textAnchor="middle" y="-28" className="fill-white text-[8px] font-black">{snow.toFixed(0)}cm</text>
                   </g>
                 </g>
               </Marker>
