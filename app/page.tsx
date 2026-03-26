@@ -7,7 +7,7 @@ import ThemeToggle from '../components/ThemeToggle';
 import ResortDetails from '../components/ResortDetails';
 import { 
   Thermometer, Navigation2, CloudFog, Zap, Snowflake, CircleSlash, Rocket, Star, Map as MapIcon, ChevronUp, Droplets 
-} from 'lucide-material';
+} from 'lucide-react'; // Bilo je lucide-material, sada je lucide-react
 
 const BalkanMap = dynamic(() => import('../components/BalkanMap'), { ssr: false });
 

@@ -1,6 +1,6 @@
 "use client"
 import React from 'react'
-import { X, Thermometer, Droplets, Wind, Navigation2, Snowflake, Cloud, CloudRain } from 'lucide-material'
+import { X, Thermometer, Droplets, Wind, Navigation2, Snowflake, Cloud, CloudRain } from 'lucide-react'; // Isto i ovde
 
 export default function ResortDetails({ resort, onClose, lang }: { resort: any, onClose: () => void, lang: 'sr' | 'en' }) {
   if (!resort || !resort.hourly) return null;
