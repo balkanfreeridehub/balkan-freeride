@@ -27,21 +27,21 @@ export default function BalkanMap({ resorts = [], timeframe, onSelect, getStatus
 
           return (
             <React.Fragment key={r.id}>
-              <Marker coordinates={[r.lon, r.lat]} onMouseEnter={() => setHovered({ ...r, calcSnow, status })} onMouseLeave={() => setHovered(null)} onClick={() => onSelect(r)} className="cursor-pointer outline-none">
-                <circle r={8} fill={status.color} stroke="#fff" strokeWidth={2} className="transition-transform duration-300 hover:scale-125" />
-                <text textAnchor="middle" y={20} className="text-[8px] font-black uppercase fill-slate-400 pointer-events-none">{r.name}</text>
+              <Marker coordinates={[r.lon, r.lat]} onMouseEnter={() => setHovered({ ...r, calcSnow, status })} onMouseLeave={() => setHovered(null)} onClick={() => onSelect(r)} className="cursor-pointer outline-none group">
+                <circle r={8} fill={status.color} stroke="#fff" strokeWidth={2} className="transition-all duration-300 group-hover:scale-150 group-hover:stroke-[3px]" />
+                <text textAnchor="middle" y={22} className="text-[9px] font-black uppercase fill-slate-500 dark:fill-slate-400 pointer-events-none tracking-tighter shadow-sm">{r.name}</text>
               </Marker>
 
               {hovered?.id === r.id && (
                 <Marker coordinates={[r.lon, r.lat]}>
-                  <g transform="translate(-80, -110)">
-                    {/* MOST - Spaja tacku i tooltip */}
-                    <rect width="160" height="120" fill="transparent" onMouseEnter={() => setHovered(hovered)} onMouseLeave={() => setHovered(null)} />
-                    <foreignObject width="160" height="100" className="pointer-events-none">
-                      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 shadow-2xl rounded-[2rem] flex flex-col items-center pointer-events-auto cursor-pointer border border-black/5 transition-all" onClick={() => onSelect(r)}>
-                        <div className="w-8 h-1 rounded-full mb-2" style={{ backgroundColor: hovered.status.color }} />
-                        <span className="text-[10px] font-black uppercase tracking-tighter">{hovered.name}</span>
-                        <span className="text-lg font-black mt-1" style={{ color: hovered.status.color }}>+{hovered.calcSnow.toFixed(1)}cm</span>
+                  <g transform="translate(-80, -125)">
+                    {/* MOST: Veća nevidljiva zona sa pointer-events-auto */}
+                    <rect width="160" height="130" fill="transparent" className="pointer-events-auto" onMouseEnter={() => setHovered(hovered)} onMouseLeave={() => setHovered(null)} />
+                    <foreignObject width="160" height="110" className="pointer-events-none">
+                      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 shadow-[0_20px_50px_rgba(0,0,0,0.2)] rounded-[2.5rem] flex flex-col items-center pointer-events-auto cursor-pointer border border-black/5 scale-100 animate-in fade-in zoom-in duration-200" onClick={() => onSelect(r)}>
+                        <div className="w-10 h-1.5 rounded-full mb-3" style={{ backgroundColor: hovered.status.color }} />
+                        <span className="text-[11px] font-black uppercase tracking-tighter text-slate-500">{hovered.name}</span>
+                        <span className="text-2xl font-black mt-1" style={{ color: hovered.status.color }}>+{hovered.calcSnow.toFixed(1)}cm</span>
                       </div>
                     </foreignObject>
                   </g>
