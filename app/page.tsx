@@ -13,8 +13,8 @@ const FlagSRB = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height=
 const FlagUSA = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 64 64"><path fill="#ed4c5c" d="M48 6.6C43.3 3.7 37.9 2 32 2v4.6z"/><path fill="#fff" d="M32 11.2h21.6C51.9 9.5 50 7.9 48 6.6H32z"/><path fill="#ed4c5c" d="M32 15.8h25.3c-1.1-1.7-2.3-3.2-3.6-4.6H32z"/><path fill="#fff" d="M32 20.4h27.7c-.7-1.6-1.5-3.2-2.4-4.6H32z"/><path fill="#ed4c5c" d="M32 25h29.2c-.4-1.6-.9-3.1-1.5-4.6H32z"/><path fill="#fff" d="M32 29.7h29.9c-.1-1.6-.4-3.1-.7-4.6H32z"/><path fill="#ed4c5c" d="M61.9 29.7H32V32H2c0 .8 0 1.5.1 2.3h59.8c.1-.8.1-1.5.1-2.3s0-1.6-.1-2.3"/><path fill="#fff" d="M2.8 38.9h58.4c.4-1.5.6-3 .7-4.6H2.1c.1 1.5.4 3.1.7 4.6"/><path fill="#ed4c5c" d="M4.3 43.5h55.4c.6-1.5 1.1-3 1.5-4.6H2.8c.4 1.6.9 3.1 1.5 4.6"/><path fill="#fff" d="M6.7 48.1h50.6c.9-1.5 1.7-3 2.4-4.6H4.3c.7 1.6 1.5 3.1 2.4 4.6"/><path fill="#ed4c5c" d="M10.3 52.7h43.4c1.3-1.4 2.6-3 3.6-4.6H6.7c1 1.7 2.3 3.2 3.6 4.6"/><path fill="#fff" d="M15.9 57.3h32.2c2.1-1.3 3.9-2.9 5.6-4.6H10.3c1.7 1.8 3.6 3.3 5.6 4.6"/><path fill="#ed4c5c" d="M32 62c5.9 0 11.4-1.7 16.1-4.7H15.9c4.7 3 10.2 4.7 16.1 4.7"/><path fill="#428bc1" d="M16 6.6c-2.1 1.3-4 2.9-5.7 4.6c-1.4 1.4-2.6 3-3.6 4.6c-.9 1.5-1.8 3-2.4 4.6c-.6 1.5-1.1 3-1.5 4.6c-.4 1.5-.6 3-.7 4.6c-.1.8-.1 1.6-.1 2.4h30V2c-5.9 0-11.3 1.7-16 4.6"/></svg>;
 
 const DICT = {
-  sr: { conditions: "Trenutni Uslovi", prec: "Padavine", rain: "Kiša" },
-  en: { conditions: "Current Conditions", prec: "Precipitation", rain: "Rain" }
+  sr: { conditions: "Trenutni Uslovi", prec: "Padavine", rain: "Kiša", showMap: "Prikaži Mapu", hideMap: "Zatvori Mapu" },
+  en: { conditions: "Current Conditions", prec: "Precipitation", rain: "Rain", showMap: "Show Map", hideMap: "Close Map" }
 };
 
 export default function Home() {
@@ -48,9 +48,10 @@ export default function Home() {
 
   const getWeatherIcon = (code: number) => {
     const isNight = new Date().getHours() >= 19 || new Date().getHours() < 6;
-    if (code >= 71) return <CloudSnow size={36} className="text-white drop-shadow-md" />;
-    if (code >= 51) return <CloudRain size={36} className="text-blue-200 drop-shadow-md" />;
-    return isNight ? <Moon size={36} fill="currentColor" className="text-yellow-200" /> : <Sun size={36} fill="currentColor" className="text-yellow-400" />;
+    const props = { size: 36, fill: "currentColor", className: "drop-shadow-xl" };
+    if (code >= 71) return <CloudSnow {...props} className="text-white" />;
+    if (code >= 51) return <CloudRain {...props} className="text-blue-300" />;
+    return isNight ? <Moon {...props} className="text-yellow-100" /> : <Sun {...props} className="text-yellow-400" />;
   };
 
   return (
@@ -67,7 +68,7 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-6 py-10">
         <button onClick={() => setShowMap(!showMap)} className="w-full mb-8 py-6 bg-white dark:bg-white/5 border border-black/5 rounded-[2.5rem] font-black uppercase tracking-[0.4em] flex items-center justify-center gap-2 transition-all hover:bg-slate-50 dark:text-white">
-          <MapIcon size={20} className="text-[#A855F7]" /> {showMap ? 'Zatvori Mapu' : 'Prikaži Mapu'}
+          <MapIcon size={20} className="text-[#A855F7]" /> {showMap ? t.hideMap : t.showMap}
         </button>
 
         {showMap && (
@@ -91,7 +92,7 @@ export default function Home() {
             let snow = 0; let totalPrec = 0;
             resort.hourly?.precipitation?.slice(0, timeframe).forEach((p:number, i:number) => {
               totalPrec += p;
-              if (p > 0 && resort.hourly.temperature_2m[i] <= 1) snow += p * 2.5; // POJAČAN SNEG
+              if (p > 0 && resort.hourly.temperature_2m[i] <= 1) snow += p * 2.5;
             });
             const rain = Math.max(0, totalPrec - (snow / 2.5));
             const s = getStatus(snow);
@@ -113,13 +114,13 @@ export default function Home() {
                       <span className="text-xl font-black opacity-40 uppercase">cm</span>
                    </div>
 
-                   <div className="bg-black/10 backdrop-blur-md px-6 py-4 rounded-3xl flex justify-between border border-white/10">
+                   <div className="bg-black/10 backdrop-blur-md px-6 py-4 rounded-3xl flex justify-between border border-white/10 items-center">
                       <div className="flex flex-col">
-                        <span className="text-[8px] font-black uppercase opacity-60 tracking-wider">{t.prec}</span>
+                        <span className="text-[8px] font-black uppercase opacity-60">{t.prec}</span>
                         <span className="text-base font-black">{totalPrec.toFixed(1)}mm</span>
                       </div>
                       <div className="flex flex-col text-right">
-                        <span className="text-[8px] font-black uppercase opacity-60 tracking-wider text-blue-200">{t.rain}</span>
+                        <span className="text-[8px] font-black uppercase opacity-60 text-blue-200">{t.rain}</span>
                         <span className="text-base font-black text-blue-100">{rain.toFixed(1)}mm</span>
                       </div>
                    </div>
@@ -131,15 +132,16 @@ export default function Home() {
                   <div className="aspect-square bg-slate-50 dark:bg-white/5 rounded-[2rem] flex items-center justify-center border border-black/5">
                      {getWeatherIcon(resort.current?.weather_code)}
                   </div>
+                  {/* UNIFORMISANI BOXOVI: ICON GORE, BROJ DOLE */}
                   <div className="aspect-square bg-slate-50 dark:bg-white/5 rounded-[2rem] flex flex-col items-center justify-center border border-black/5 gap-2">
-                     <Thermometer size={22} className="text-[#A855F7] opacity-40" />
-                     <span className="text-2xl font-black dark:text-white">{resort.current?.temperature_2m}°</span>
+                     <Thermometer size={24} className="text-[#A855F7] opacity-60" />
+                     <span className="text-xl font-black dark:text-white leading-none">{resort.current?.temperature_2m}°</span>
                   </div>
-                  <div className="aspect-square bg-slate-50 dark:bg-white/5 rounded-[2rem] flex items-center justify-center border border-black/5 p-4 relative">
-                     <Navigation size={22} fill="currentColor" style={{ transform: `rotate(${resort.current?.wind_direction_10m}deg)` }} className="text-[#A855F7] opacity-30 absolute" />
-                     <div className="flex items-baseline z-10">
-                        <span className="text-2xl font-black dark:text-white">{resort.current?.wind_speed_10m}</span>
-                        <span className="text-[8px] font-black opacity-30 ml-1 dark:text-white">KM/H</span>
+                  <div className="aspect-square bg-slate-50 dark:bg-white/5 rounded-[2rem] flex flex-col items-center justify-center border border-black/5 gap-2">
+                     <Navigation size={24} fill="currentColor" style={{ transform: `rotate(${resort.current?.wind_direction_10m}deg)` }} className="text-[#A855F7] opacity-60" />
+                     <div className="flex items-baseline leading-none">
+                        <span className="text-xl font-black dark:text-white">{resort.current?.wind_speed_10m}</span>
+                        <span className="text-[7px] font-black opacity-30 ml-0.5 dark:text-white uppercase tracking-tighter">km/h</span>
                      </div>
                   </div>
                 </div>
