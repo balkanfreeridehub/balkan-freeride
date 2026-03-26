@@ -11,7 +11,7 @@ export default function BalkanMap({ resorts = [], timeframe, onSelect, getStatus
     <div className="relative w-full h-full bg-[#f1f5f9] dark:bg-[#050b1a]">
       <ComposableMap 
         projection="geoAzimuthalEqualArea" 
-        projectionConfig={{ rotate: [-19.5, -42.8, 0], scale: 18000 }} 
+        projectionConfig={{ rotate: [-19.5, -42.8, 0], scale: 16000 }} 
         className="w-full h-full"
       >
         <Geographies geography={geoUrl}>
