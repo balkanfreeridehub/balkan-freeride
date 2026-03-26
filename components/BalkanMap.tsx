@@ -1,77 +1,72 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "react-simple-maps";
 import { useRouter } from 'next/navigation';
-import { useTheme } from "next-themes";
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 export default function BalkanMap({ resorts, timeframe, getStatus }: any) {
   const router = useRouter();
-  const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [position, setPosition] = useState({ coordinates: [19.0, 42.5], zoom: 1 });
 
   useEffect(() => setMounted(true), []);
-  if (!mounted) return <div className="w-full h-full bg-slate-100 dark:bg-slate-900 animate-pulse" />;
 
-  const isDark = theme === 'dark';
+  function handleMoveEnd(newPosition: any) {
+    setPosition(newPosition);
+    console.log("MAPA - Center:", newPosition.coordinates, "Zoom:", newPosition.zoom);
+  }
+
+  if (!mounted) return <div className="w-full h-full bg-slate-50 dark:bg-slate-900 animate-pulse rounded-3xl" />;
 
   return (
-    <div className="w-full h-full bg-transparent overflow-visible">
+    <div className="relative w-full h-full min-h-[500px]">
       <ComposableMap
         projection="geoAzimuthalEqualArea"
-        projectionConfig={{ 
-          rotate: [-19.0, -42.5, 0], // Centrirano bliže Kolašinu
-          scale: 6000 
-        }}
+        projectionConfig={{ scale: 5000 }}
+        style={{ width: "100%", height: "100%" }}
       >
-        <ZoomableGroup center={[19.0, 42.5]} zoom={1} minZoom={1} maxZoom={1} disablePanning disableZooming>
+        <ZoomableGroup 
+          center={position.coordinates as [number, number]} 
+          zoom={position.zoom}
+          onMoveEnd={handleMoveEnd}
+        >
           <Geographies geography={geoUrl}>
-            {({ geographies }: { geographies: any[] }) =>
-              geographies.map((geo: any) => (
-                <Geography 
-                  key={geo.rsmKey} 
-                  geography={geo} 
-                  fill={isDark ? "#0f172a" : "#f1f5f9"} 
-                  stroke={isDark ? "#1e293b" : "#cbd5e1"}
-                  strokeWidth={0.5}
-                  style={{
-                    default: { outline: "none" },
-                    hover: { fill: isDark ? "#0f172a" : "#f1f5f9", outline: "none" },
-                    pressed: { outline: "none" }
-                  }}
+            {({ geographies }) =>
+              geographies.map((geo) => (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  className="fill-slate-200 dark:fill-slate-800 stroke-slate-300 dark:stroke-slate-700 outline-none"
                 />
               ))
             }
           </Geographies>
 
           {resorts.map((resort: any) => {
-            let snow = 0;
-            resort.hourly?.precipitation?.slice(0, timeframe).forEach((p: number, i: number) => {
-              if (p > 0 && resort.hourly.temperature_2m[i] <= 1) snow += p * 1.5;
-            });
-            const s = getStatus(snow);
-            // Jahorina i Bjelašnica su blizu, Jahorinu dižemo gore
-            const isJahorina = resort.name === 'Jahorina';
-
+            const s = getStatus(0); // Ovde ide tvoja logika za sneg po timeframe-u
             return (
               <Marker key={resort.id} coordinates={[resort.lon, resort.lat]}>
-                <g className="cursor-pointer outline-none group" onClick={() => router.push(`/resort/${resort.id}`)}>
-                  <circle r="10" fill={s.color} className="animate-ping opacity-20" />
-                  <circle r="5" fill={s.color} stroke="white" strokeWidth={2} />
+                <g 
+                  className="cursor-pointer group outline-none" 
+                  onClick={() => router.push(`/resort/${resort.id}`)}
+                >
+                  <circle r="6" fill={s.color} className="animate-pulse opacity-40" />
+                  <circle r="3" fill={s.color} stroke="white" strokeWidth={1.5} />
                   
                   <text 
                     textAnchor="middle" 
-                    y={isJahorina ? -12 : 18} 
-                    className="fill-slate-500 dark:fill-slate-400 text-[9px] font-bold uppercase pointer-events-none tracking-tighter"
+                    y={14} 
+                    className="fill-slate-500 dark:fill-slate-400 text-[9px] font-bold uppercase pointer-events-none"
                   >
                     {resort.name}
                   </text>
 
-                  {/* Info Box na Hover */}
+                  {/* Veći InfoBox Tooltip */}
                   <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    <rect x="-30" y="-45" width="60" height="25" rx="8" fill="#020617" />
-                    <text textAnchor="middle" y="-28" className="fill-white text-[8px] font-black">{snow.toFixed(0)}cm</text>
+                    <rect x="-45" y="-55" width="90" height="40" rx="6" fill="#020617" />
+                    <text textAnchor="middle" y="-40" fill="white" className="text-[9px] font-bold">{resort.name}</text>
+                    <text textAnchor="middle" y="-25" fill="#3b82f6" className="text-[8px]">KLIKNI ZA DETALJE</text>
                   </g>
                 </g>
               </Marker>
@@ -79,6 +74,10 @@ export default function BalkanMap({ resorts, timeframe, getStatus }: any) {
           })}
         </ZoomableGroup>
       </ComposableMap>
+      
+      <div className="absolute bottom-4 left-4 bg-white/80 dark:bg-black/80 p-2 text-[10px] rounded border border-slate-200 dark:border-slate-800">
+        Centriraj mapu mišem, pa javi koordinate iz konzole.
+      </div>
     </div>
   );
 }
