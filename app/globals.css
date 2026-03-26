@@ -1,19 +1,26 @@
-@layer base {
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: #8b57ff transparent;
-  }
+@import "tailwindcss";
 
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
+/* Neutralan skrolbar - bez ljubičaste */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #475569 transparent;
+}
 
-  ::-webkit-scrollbar-thumb {
-    background-color: #8b57ff;
-    border-radius: 20px;
-  }
+::-webkit-scrollbar {
+  width: 6px;
+}
 
-  body {
-    @apply bg-[#F8FAFC] dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-300;
-  }
+::-webkit-scrollbar-thumb {
+  background-color: #475569;
+  border-radius: 20px;
+}
+
+body {
+  background-color: #F8FAFC;
+  color: #0f172a;
+}
+
+.dark body {
+  background-color: #020617;
+  color: #f1f5f9;
 }
