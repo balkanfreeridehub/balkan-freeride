@@ -8,14 +8,14 @@ export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => setMounted(true), [])
-  if (!mounted) return null
+  if (!mounted) return <div className="w-14 h-7 bg-slate-100 rounded-full animate-pulse" />
 
   const isDark = theme === 'dark'
 
   return (
     <button
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      className="relative w-14 h-7 flex items-center bg-slate-200 dark:bg-white/10 rounded-full p-1 transition-all duration-300 shadow-inner"
+      className="relative w-14 h-7 flex items-center bg-slate-200 dark:bg-white/10 rounded-full p-1 transition-all duration-300 shadow-inner cursor-pointer"
     >
       <div 
         className={`absolute w-5 h-5 bg-white dark:bg-blue-500 rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center ${isDark ? 'translate-x-7' : 'translate-x-0'}`}
