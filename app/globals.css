@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+@theme {
+  /* Mapiranje za Tailwind v4 utility klase */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  --color-muted: var(--muted);
+  --color-accent: #3b82f6;
+}
+
 @layer base {
   :root {
     --background: #f8fafc;
@@ -19,12 +29,15 @@
 }
 
 body {
-  background-color: var(--background) !important;
-  color: var(--foreground) !important;
+  background-color: var(--background);
+  color: var(--foreground);
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* --- TVOJI ORIGINALNI STILOVI (Vraćeni u potpunosti) --- */
 
 /* Fix za slajder pozadinu */
 .slider-container {
@@ -53,6 +66,7 @@ body {
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
 }
 
+/* No-scrollbar utility */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -62,7 +76,7 @@ svg {
   overflow: visible !important;
 }
 
-/* Hover bridge za mapu - omogućava da miš pređe sa markera na tooltip bez gubitka hovera */
+/* Hover bridge za mapu */
 .group:hover foreignObject {
   pointer-events: auto;
 }

@@ -1,16 +1,40 @@
-import { Providers } from "../components/Providers";
+import type { Metadata, Viewport } from "next";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
-export const metadata = {
-  title: "Balkan Freeride Hub",
-  description: "Snow forecast and live cams for Balkan ski resorts",
+export const metadata: Metadata = {
+  title: "Balkan Freeride",
+  description: "Snow forecast for Balkan resorts",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// Optimizacija za mobilne uređaje (freeride dashboard stil)
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="antialiased transition-colors duration-300">
-        <Providers>{children}</Providers>
+    <html lang="sr" suppressHydrationWarning>
+      <body className="antialiased">
+        {/* defaultTheme="light": Postavlja belu temu kao osnovnu.
+          enableSystem={false}: Sprečava da sajt "pobegne" u tamnu temu 
+          ako ti je Windows/macOS u dark modu.
+        */}
+        <ThemeProvider 
+          attribute="class" 
+          defaultTheme="light" 
+          enableSystem={false}
+          disableTransitionOnChange={false}
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
